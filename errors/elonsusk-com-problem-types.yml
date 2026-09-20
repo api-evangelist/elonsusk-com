@@ -1,0 +1,85 @@
+generated: '2026-09-19'
+method: derived
+source: openapi/elonsusk-com-openapi.json
+probed: true
+docs: https://a2a.elonsusk.com/docs
+format: fastapi-detail-envelope
+envelope:
+  media_type: application/json
+  fields:
+  - name: detail
+    description: >-
+      FastAPI's default envelope. Three shapes are observed: a plain string for framework errors
+      ("Not Found", "Method Not Allowed"); an object {"error": "<message>"} for application errors raised by
+      the agent's handlers; and an array of {type, loc, msg, input, ctx?} ValidationError objects on 422.
+  observed:
+  - {status: 404, body: '{"detail":"Not Found"}', url: 'GET https://a2a.elonsusk.com/llms.txt', note: 'The generic 404 for every unknown path — 22 bytes, application/json, never an HTML shell.'}
+  - {status: 404, body: '{"detail":{"error":"task not found: apievangelist-nonexistent-probe"}}', url: 'GET https://a2a.elonsusk.com/v1/tasks/apievangelist-nonexistent-probe'}
+  - {status: 404, body: '{"detail":{"error":"unsupported skill: not.a.skill"}}', url: 'POST https://a2a.elonsusk.com/x402/not.a.skill'}
+  - {status: 405, body: '{"detail":"Method Not Allowed"}', url: 'GET https://a2a.elonsusk.com/x402/util.uuid; GET /v1/leads; POST /'}
+  - {status: 422, body: '{"detail":[{"type":"int_parsing","loc":["query","limit"],"msg":"Input should be a valid integer, unable to parse string as an integer","input":"abc"}]}', url: 'GET https://a2a.elonsusk.com/v1/tasks?limit=abc'}
+  - {status: 402, body: '{"x402Version":2,"error":"PAYMENT-SIGNATURE header is required","resource":{...},"accepts":[...],"extensions":{...}}', url: 'POST https://a2a.elonsusk.com/x402/util.json.format', note: 'NOT the detail envelope: the 402 body is an x402 v2 PaymentRequired object and the same JSON is repeated base64-encoded in the PAYMENT-REQUIRED response header.'}
+  note: >-
+    Not RFC 9457. No type URI, no title/status/instance fields, no error-code registry. The contract declares
+    only 200 and 422 on every operation; the 402, 404 and 405 rows above are observed, not declared. The A2A
+    surface (/a2a) uses JSON-RPC 2.0 error objects instead.
+problem_types:
+- status: 402
+  title: Payment required (x402 challenge)
+  occurrences: 1
+  source_operations: [x402_pay_per_call_x402__skill__post]
+  declared_in_contract: false
+  causes:
+  - No PAYMENT-SIGNATURE header on a priced skill ("PAYMENT-SIGNATURE header is required").
+  remediation: >-
+    Read accepts[] from the body or the PAYMENT-REQUIRED header, pay one of the offered rails (USDC on Base
+    eip155:8453 or USDC on Solana, amount in atomic units — "2000" = $0.002 at 6 decimals), and retry the
+    same request with PAYMENT-SIGNATURE. For the invoice-bridge path, accepts[].extra.note says to send USDC
+    to payTo and retry with payload.tx_ref = the transaction hash, verified on-chain and usable for exactly
+    one call. maxTimeoutSeconds is 120.
+- status: 404
+  title: Task not found
+  occurrences: 2
+  source_operations: [get_task_v1_tasks__task_id__get, mark_paid_v1_tasks__task_id__mark_paid_post]
+  declared_in_contract: false
+  causes: [Unknown task_id.]
+  remediation: Use the id returned by create_task_v1_tasks_post or tasks/send; ids are UUIDv4 strings. Over JSON-RPC the same condition is error code 404 (not -32001).
+- status: 404
+  title: Unsupported skill
+  occurrences: 1
+  source_operations: [x402_pay_per_call_x402__skill__post]
+  declared_in_contract: false
+  causes: ['The {skill} path segment is not one of the priced skills.']
+  remediation: Pick a path from /.well-known/x402.json endpoints[] (27 entries) or a skill id from GET /health skills[].
+- status: 404
+  title: Not Found (framework)
+  occurrences: 1
+  source_operations: [any undeclared path]
+  declared_in_contract: false
+  remediation: The path is not routed. This is also the response for every /.well-known/ document the agent does not serve.
+- status: 405
+  title: Method Not Allowed
+  occurrences: 1
+  source_operations: [x402_pay_per_call_x402__skill__post, create_public_lead_v1_leads_post, jsonrpc_a2a_post]
+  declared_in_contract: false
+  causes: [GET on a POST-only route (x402, leads), or JSON-RPC POSTed to the origin root instead of /a2a.]
+  remediation: POST /x402/{skill}, POST /v1/leads, POST /a2a. Note the canonical agent card's top-level url is the origin; use supportedInterfaces[0].url.
+- status: 422
+  title: Validation Error
+  occurrences: 12
+  source_operations: [x402_pay_per_call_x402__skill__post, create_task_v1_tasks_post, list_tasks_v1_tasks_get, get_task_v1_tasks__task_id__get, mark_paid_v1_tasks__task_id__mark_paid_post, payment_webhook_v1_payments_webhook__provider__post, jsonrpc_a2a_post, create_public_lead_v1_leads_post]
+  declared_in_contract: true
+  schema: '#/components/schemas/HTTPValidationError'
+  causes:
+  - Query/path/body value fails the Pydantic model (observed: limit=abc -> int_parsing).
+  - PublicLeadRequest bounds — contact 3-240 chars, brief 12-8000 chars, skill <= 80 chars, budget_usd 0-100000.
+  remediation: Each detail[] entry names loc (where), type (what) and input (the offending value); fix and resend. The only status the contract declares besides 200.
+jsonrpc_errors:
+  endpoint: https://a2a.elonsusk.com/a2a
+  transport_status: HTTP 200 for every JSON-RPC error; the error is in the body.
+  codes:
+  - {code: -32600, message: invalid JSON-RPC version, observed: true, cause: 'Body lacks "jsonrpc":"2.0".'}
+  - {code: -32601, message: 'unknown method: <name>', observed: true, cause: 'Method outside tasks/send, tasks/get, tasks/cancel (and the aliases the card lists).'}
+  - {code: -32602, message: tasks/get requires id or task_id, observed: true, cause: Missing params.}
+  - {code: 404, message: 'task not found: <id>', observed: true, cause: Unknown task id on tasks/get or tasks/cancel., note: 'Non-standard: A2A defines -32001 TaskNotFoundError for this.'}
+  note: tasks/send was not invoked (it creates a task), so its error codes are unrecorded.

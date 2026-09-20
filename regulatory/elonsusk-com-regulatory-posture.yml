@@ -1,0 +1,40 @@
+generated: '2026-09-19'
+method: searched
+probe: true
+source: https://a2a.elonsusk.com/
+signals: {}
+summary: >-
+  No horizontal regulatory signal of any kind is published. The only live host serves an agent card, an
+  OpenAPI, an x402 discovery document and a landing page; it has no terms of service, no privacy policy, no
+  legal, security, accessibility or transparency page, and the artifacts harvested this run (well-known/,
+  security/, lifecycle/, conformance/) surfaced nothing to point at. The registrable domain serves no
+  website at all. An empty signals block is the measurement, not a gap in the probe.
+probed:
+- {url: 'https://a2a.elonsusk.com/terms', status: 404}
+- {url: 'https://a2a.elonsusk.com/tos', status: 404}
+- {url: 'https://a2a.elonsusk.com/privacy', status: 404}
+- {url: 'https://a2a.elonsusk.com/privacy/requests', status: 404}
+- {url: 'https://a2a.elonsusk.com/legal', status: 404}
+- {url: 'https://a2a.elonsusk.com/legal/subprocessors', status: 404}
+- {url: 'https://a2a.elonsusk.com/legal/dpa', status: 404}
+- {url: 'https://a2a.elonsusk.com/legal/report-content', status: 404}
+- {url: 'https://a2a.elonsusk.com/accessibility', status: 404}
+- {url: 'https://a2a.elonsusk.com/accessibility/vpat', status: 404}
+- {url: 'https://a2a.elonsusk.com/transparency', status: 404}
+- {url: 'https://a2a.elonsusk.com/security', status: 404}
+- {url: 'https://a2a.elonsusk.com/security/sbom', status: 404}
+- {url: 'https://a2a.elonsusk.com/docs/data-residency', status: 404}
+- {url: 'https://a2a.elonsusk.com/ai/transparency', status: 404}
+- {url: 'https://a2a.elonsusk.com/.well-known/security.txt', status: 404}
+- {url: 'https://a2a.elonsusk.com/contact', status: 404}
+- {url: 'https://a2a.elonsusk.com/about', status: 404}
+- {url: 'https://elonsusk.com/', status: 0, note: TLS connection refused; HTTP on port 80 answers 401}
+observations:
+- >-
+  AI transparency, informally: the agent card and landing page state plainly that four skills are
+  "model-backed" and that the agent is an "autonomous contractor"; the landing copy names "local Ollama
+  inference". This is product description, not a transparency statement, and is not recorded as a signal.
+- >-
+  Subprocessors, informally: the card's payment_notes name NOWPayments and CoinGate as checkout providers,
+  the 402 challenge names facilitator.payai.network, and /healthz names an Alchemy Solana RPC. These are
+  integration facts in machine documents, not a published subprocessor list, and are not recorded as a signal.

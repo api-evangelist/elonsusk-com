@@ -1,0 +1,60 @@
+generated: '2026-09-19'
+method: searched
+source: https://a2a.elonsusk.com/.well-known/agent-card.json
+derived_from: openapi/elonsusk-com-openapi.json
+docs:
+- https://a2a.elonsusk.com/.well-known/x402.json
+- https://a2a.elonsusk.com/docs
+summary: >-
+  There is no authentication. The OpenAPI declares no securitySchemes and no security requirement on any
+  of its 24 operations; the agent card's auth block is {"type": "none", "header": null} and its
+  securitySchemes/security are empty; every read (agent card, x402 catalog, health, metrics, the full task
+  list, any task by id) answers anonymously. What gates the paid surface is PAYMENT, in two forms: an x402
+  v2 PAYMENT-SIGNATURE header on POST /x402/{skill} (a call without it returns HTTP 402 with a
+  PAYMENT-REQUIRED challenge), and for the quote-first task API an on-chain invoice whose memo must equal
+  the task id, confirmed by the operator's payment watcher or a checkout-provider webhook. Neither is an
+  identity: the agent never learns who the caller is, only that a payment settled. No API keys are issued,
+  no OAuth server exists (/.well-known/oauth-authorization-server and /oauth-protected-resource 404), and
+  no signup exists.
+schemes: []
+access_model:
+  identity: none
+  gate: payment
+  mechanisms:
+  - name: x402 pay-per-call
+    surface: POST /x402/{skill} (x402_pay_per_call_x402__skill__post)
+    request_header: PAYMENT-SIGNATURE
+    challenge: HTTP 402 with PAYMENT-REQUIRED response header (base64 JSON, identical to the body) — x402Version 2, accepts[] of {scheme exact, network, amount, asset, payTo, maxTimeoutSeconds 120, extra}
+    settle_header: PAYMENT-RESPONSE (declared in /.well-known/x402.json; not observed — settlement was not exercised)
+    rails:
+    - {network: 'eip155:8453', asset: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 (USDC on Base)', verification: evm_rpc}
+    - {network: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp', asset: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v (USDC on Solana)', verification: solana_rpc}
+    facilitator: https://facilitator.payai.network
+    alternative: >-
+      accepts[].extra.note — "Send USDC on Base to payTo, then retry with payload.tx_ref = the transaction
+      hash. Verified on-chain (receipt success, USDC contract, correct payee, amount >= price) and usable for
+      exactly one call." (invoiceBridge true, settlesRealFunds true)
+    observed: '2026-09-19 — POST https://a2a.elonsusk.com/x402/util.json.format returned 402 with the header and body above; amount "2000" for a $0.002 skill.'
+  - name: Quote-first crypto invoice
+    surface: POST /v1/tasks (create_task_v1_tasks_post) or A2A tasks/send on POST /a2a
+    flow: create task -> response carries quote {quote_usd, tokens_estimate, pricing} and invoice {amount_usd, asset, address, memo, expires_at, provider, status} -> pay any enabled method with memo = task id -> state moves payment_required -> paid -> working
+    methods: [SOL, USDC on Solana, ETH, USDC on Ethereum, BTC]
+    confirmation: operator payment watcher (solana_rpc per /healthz) or checkout-provider webhook (NOWPayments, CoinGate via POST /v1/payments/webhook/{provider}); a manual fallback is declared in payment_notes.mode
+    source: agent card payment_methods, payment_notes, how_to_order
+  - name: Human lead intake
+    surface: POST /v1/leads (create_public_lead_v1_leads_post)
+    credential: none — contact string 3-240 chars, brief 12-8000 chars, optional budget_usd
+    note: The only channel that carries a human identity, and it is free text.
+open_operations_of_note:
+- operation: list_tasks_v1_tasks_get
+  note: Returns every task in the queue with inputs, quotes, invoice addresses and memos, payment notes and results, to anyone. Not a documented feature; an observation.
+- operation: mark_paid_v1_tasks__task_id__mark_paid_post
+  note: Published in the public contract with no securityScheme. Whether the server verifies tx_ref before honouring it is not stated; treat as operator-side.
+- operation: payment_webhook_v1_payments_webhook__provider__post
+  note: Inbound provider webhook with no declared signature verification scheme in the contract.
+transport_security:
+  https: true
+  tls_version: TLSv1.2 (Cloudflare edge)
+  hsts: false
+  http_redirect: 301 to https on a2a.elonsusk.com
+  detail: security/elonsusk-com-domain-security.yml

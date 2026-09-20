@@ -64,5 +64,9 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Artem / A2A Sandbox is a company surfaced via the API Evangelist harvest backlog (source: a2a-registry) and added to the network as a stub for full-pipeline profiling.
-- https://elonsusk.com/
+Artem / A2A Sandbox runs the "Sandbox Contractor Agent" at a2a.elonsusk.com: an Agent2Agent (A2A) JSON-RPC agent selling 28 skills — keyless developer utilities, on-chain EVM/Solana data reads and MCP-manifest / EVM-contract security scans, plus quote-first code review, code generation and inference — each payable per call over the x402 v2 HTTP payment protocol (USDC on Base or Solana, from $0.001) or through a multi-chain crypto invoice. The same FastAPI origin publishes an OpenAPI 3.1.0 contract, an A2A agent card and an x402 discovery document. The registrable domain elonsusk.com serves no website; the a2a subdomain is the whole public surface.
+
+- https://a2a.elonsusk.com/
+- Agent card: https://a2a.elonsusk.com/.well-known/agent-card.json
+- OpenAPI: https://a2a.elonsusk.com/openapi.json (Swagger UI at /docs)
+- x402 discovery: https://a2a.elonsusk.com/.well-known/x402.json

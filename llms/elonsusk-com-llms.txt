@@ -1,0 +1,40 @@
+# Artem / A2A Sandbox — Sandbox Contractor Agent
+
+> A paid, keyless contractor agent at https://a2a.elonsusk.com selling 28 skills to other agents: developer utilities (JSON/YAML/CSV conversion, hashing incl. keccak256, base64/hex/base58, JWT decode, UUID, semver, epoch), on-chain EVM/Solana data reads, MCP-manifest and EVM-contract security scans, and model-backed code review, code generation and inference. Every skill is payable per call over x402 v2 (HTTP 402 + PAYMENT-REQUIRED, USDC on Base or Solana, from $0.001) or through a quote-first crypto invoice. There is no authentication and no signup; payment is the gate.
+
+<!-- generated: 2026-09-19 | method: generated | source: apis.yml + repo artifacts. The provider publishes no /llms.txt (probed 2026-09-19, 404). This file was written by API Evangelist from the provider's own agent card, OpenAPI and x402 discovery document. -->
+
+## Start here
+
+- [Agent card (A2A)](https://a2a.elonsusk.com/.well-known/agent-card.json): 28 skills, pricing, payment rails, endpoint map, task state machine. JSON-RPC endpoint is https://a2a.elonsusk.com/a2a (use supportedInterfaces[0].url; the top-level url is the origin and answers 405).
+- [x402 discovery](https://a2a.elonsusk.com/.well-known/x402.json): the 27 priced endpoints with CAIP-2 networks, USDC asset and payTo addresses, and JSON Schema inputs/outputs.
+- [OpenAPI 3.1.0](https://a2a.elonsusk.com/openapi.json): 24 operations. Swagger UI at https://a2a.elonsusk.com/docs, ReDoc at https://a2a.elonsusk.com/redoc.
+- [Health](https://a2a.elonsusk.com/health): the 30 live skill ids. [Healthz](https://a2a.elonsusk.com/healthz): degraded rails, queue counts, worker concurrency. [Metrics](https://a2a.elonsusk.com/v1/metrics): job and revenue counters.
+- [Landing page](https://a2a.elonsusk.com/): packages (Quick Review $5, Full Code Gen $25, Rush 1hr $100), curl examples, human lead form.
+
+## Three ways to call a skill
+
+1. x402 pay-per-call: `POST https://a2a.elonsusk.com/x402/{skill}` with a JSON body. Without a `PAYMENT-SIGNATURE` header you get HTTP 402 and a `PAYMENT-REQUIRED` header (base64 JSON, same as the body) listing `accepts[]` — pay one rail (amount is in atomic units: "2000" = $0.002 USDC) and retry with `PAYMENT-SIGNATURE`. Challenges are valid for 120 seconds. Facilitator: https://facilitator.payai.network.
+2. Quote-first REST: `POST https://a2a.elonsusk.com/v1/tasks {"skill": "...", "input": {...}}` returns a task with a USD quote and a crypto invoice (SOL, USDC, ETH, BTC) whose memo must be the task id. Poll `GET /v1/tasks/{task_id}` through submitted → quoted → payment_required → paid → working → completed | failed | canceled.
+3. A2A JSON-RPC: `POST https://a2a.elonsusk.com/a2a` with methods `tasks/send`, `tasks/get`, `tasks/cancel` (JSON-RPC 2.0; unknown task id returns error code 404, unknown method -32601).
+
+## Skill ids and x402 prices (USD per call)
+
+- Utilities ($0.002-$0.003): util.json.format, util.json.to_yaml, util.yaml.to_json, util.csv.to_json, util.base64, util.hex, util.base58, util.hash, util.uuid, util.jwt.decode, util.solana.address.validate, util.time.epoch, util.semver.compare
+- On-chain data ($0.001-$0.002): data.evm.native_balance, data.evm.erc20_balance, data.evm.erc20_metadata, data.evm.gas_price, data.evm.tx_status, data.solana.balance, data.solana.token_supply, data.solana.spl_balance
+- Security: security.mcp_scan ($0.02), security.evm.contract_signals ($0.004)
+- Model-backed (quoted; x402 price where listed): code.review ($0.01), code.generate ($0.10), inference.complete ($0.02), external.llm.delegate, batch.discount. These depend on a model rail that /healthz may report degraded.
+
+## Things an agent should know
+
+- No auth, no API key, no OAuth, no rate limits published and no rate-limit headers returned.
+- No idempotency key. A retried POST /v1/tasks may create a second task; an x402 tx_ref settles exactly one call.
+- Cancel exists (tasks/cancel) but no window or refund policy is published. x402 payments have no reversal.
+- Errors are FastAPI-shaped `{"detail": ...}`, not RFC 9457; 422 is the only declared error status; 402/404/405 are observed.
+- No terms of service, privacy policy, security.txt or status page exist. The registrable domain elonsusk.com serves no website; a2a.elonsusk.com is the whole surface.
+- No MCP server is hosted (the agent sells an MCP-manifest scan, but /mcp is 404).
+
+## API Evangelist profile
+
+- [apis.yml](https://raw.githubusercontent.com/api-evangelist/elonsusk-com/refs/heads/main/apis.yml)
+- Artifacts in this repository: openapi/, a2a/, well-known/, conformance/, conventions/, authentication/, errors/, lifecycle/, plans/, rate-limits/, data-model/, skills/, mcp/ (candidate only), agentic-access/, security/, regulatory/, packages/.

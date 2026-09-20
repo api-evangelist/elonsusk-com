@@ -1,0 +1,148 @@
+generated: '2026-09-19'
+method: searched
+source: https://a2a.elonsusk.com/openapi.json
+derived_from: openapi/elonsusk-com-openapi.json
+docs:
+- https://a2a.elonsusk.com/.well-known/agent-card.json
+- https://a2a.elonsusk.com/.well-known/x402.json
+- https://a2a.elonsusk.com/
+base_url: https://a2a.elonsusk.com
+media_type: application/json
+api_style: >-
+  One FastAPI origin exposing three doors onto one task queue — REST (/v1/tasks), JSON-RPC 2.0 (/a2a, the
+  A2A surface) and x402 pay-per-call (/x402/{skill}) — plus anonymous discovery, health and metrics reads.
+auth:
+  style: >-
+    None. No securitySchemes, no API keys, no OAuth. Paid operations are gated by payment: an x402 v2
+    PAYMENT-SIGNATURE header on /x402/{skill} (402 + PAYMENT-REQUIRED without it), or a crypto invoice whose
+    memo is the task id on the quote-first task API.
+  detail: authentication/elonsusk-com-authentication.yml
+idempotency:
+  supported: false
+  coverage: none
+  mechanism: null
+  header: null
+  scope: []
+  retention: undocumented
+  description: >-
+    No Idempotency-Key header or documented replay-safe retry on any of the 7 write operations. Two adjacent
+    facts are NOT idempotency and are recorded so they are not mistaken for it: (1) CreateTaskRequest carries
+    an optional client_task_id, whose semantics the contract does not describe — the one publicly visible
+    task has it null, and nothing states that a repeated client_task_id returns the existing task rather
+    than creating a second one; (2) the x402 challenge states a tx_ref is "usable for exactly one call"
+    (singleUseTxRef), which stops one payment settling twice but means a retried request after an ambiguous
+    outcome either fails (tx_ref spent) or needs a second payment. A timed-out POST /v1/tasks may therefore
+    have created a quoted, unpaid task the client cannot find except by scanning GET /v1/tasks.
+  gaps:
+  - No idempotency key on create_task_v1_tasks_post or A2A tasks/send.
+  - No idempotency key on x402_pay_per_call_x402__skill__post, the operation that moves money.
+  - client_task_id exists but its de-duplication behaviour is undocumented.
+dry_run_mode:
+  supported: false
+  status: none
+  mechanism: null
+  description: >-
+    No sandbox, test mode or dry-run route. /.well-known/x402.json declares a "demo" settlement mode
+    (demo_facilitator) but states enabled false, keyPublished false, movesFunds false — it is switched off and
+    no demo key is published. The 402 challenge itself is a free read (no payment is taken until the retry),
+    which is the closest thing to a rehearsal: an agent can learn the price and the rails for any skill at no
+    cost. Quote-first tasks are likewise free to create and sit in payment_required until paid.
+reversibility:
+  grade: documented
+  docs: https://a2a.elonsusk.com/.well-known/agent-card.json
+  note: >-
+    A cancel operation exists for tasks (JSON-RPC tasks/cancel, alias CancelTask; state machine includes
+    canceled; /healthz shows 2 canceled tasks), so a reversal PATH is documented — but no WINDOW is stated:
+    the card does not say which states permit cancel (before payment? while working?), and no refund policy
+    exists anywhere on the surface. Grade documented (0.4), not verified. Nothing below asserts a window the
+    provider has not written down.
+  write_surfaces:
+  - operation: create_task_v1_tasks_post / A2A tasks/send
+    action: Create a quoted task and an invoice
+    reversal: tasks/cancel over JSON-RPC (jsonrpc_a2a_post with method tasks/cancel); no REST cancel or DELETE exists
+    reversal_operation: jsonrpc_a2a_post
+    window: null
+    grade: documented
+    note: An unpaid task costs nothing and expires with its invoice (invoice.expires_at, observed 60 minutes after creation on the visible task). Whether a paid or working task can be canceled, and whether cancellation refunds, is not stated.
+  - operation: x402_pay_per_call_x402__skill__post
+    action: Settle a micropayment on-chain and execute a skill in one round trip
+    reversal: none
+    reversal_operation: null
+    window: null
+    grade: none
+    note: Funds move to payTo on a public chain; the contract documents no refund, void or dispute path. The x402 receipt shape (PAYMENT-RESPONSE) was not observed.
+  - operation: mark_paid_v1_tasks__task_id__mark_paid_post
+    action: Mark a task paid with a tx_ref
+    reversal: none documented
+    window: null
+    grade: none
+  - operation: create_public_lead_v1_leads_post
+    action: Submit a human lead (contact + brief)
+    reversal: none documented
+    window: null
+    grade: none
+    note: No way to withdraw or delete a submitted lead.
+  - operation: payment_webhook_v1_payments_webhook__provider__post
+    action: Inbound provider notification
+    reversal: n/a (provider-initiated)
+    grade: na
+pagination:
+  style: limit-only
+  operations: [list_tasks_v1_tasks_get]
+  request_params:
+    limit: integer, default 50, no documented maximum
+    state: optional filter on task state (submitted | quoted | payment_required | paid | working | awaiting_human_response | completed | failed | canceled)
+  response_fields:
+    tasks: array of Task
+    queue: '{by_state, by_priority, paid_waiting, working, payment_required} counts'
+  cursor: none
+  next_link: none
+  note: With no cursor or offset, a client cannot page past the first `limit` tasks except by raising limit; the unpaginated response at probe time was ~700 KB for 61 tasks.
+field_expansion:
+  supported: false
+sparse_fields:
+  supported: false
+metadata:
+  supported: false
+  note: client_task_id on CreateTaskRequest is the only client-supplied correlation field.
+request_tracing:
+  request_id_header: null
+  note: No request id is issued by the application; the only correlator is Cloudflare's cf-ray edge header.
+versioning:
+  scheme: URL prefix on the task API only (/v1/)
+  current: 0.1.0
+  policy_published: false
+  detail: lifecycle/elonsusk-com-lifecycle.yml
+error_envelope:
+  media_type: application/json
+  shape: 'FastAPI {"detail": string | {"error": string} | ValidationError[]}; JSON-RPC 2.0 error objects on /a2a; an x402 v2 PaymentRequired object (not the detail envelope) on 402'
+  rfc9457: false
+  detail: errors/elonsusk-com-problem-types.yml
+rate_limiting:
+  published: false
+  headers: []
+  status_on_exhaustion: undocumented
+  detail: rate-limits/elonsusk-com-rate-limits.yml
+async_model:
+  style: polling
+  description: >-
+    Tasks are asynchronous: create returns immediately in state quoted/payment_required; the client polls
+    GET /v1/tasks/{task_id} or JSON-RPC tasks/get until completed, failed or canceled. The card declares
+    streaming false and pushNotifications false; stateTransitionHistory true is honoured by the Task's
+    events[] array (one {at, state, ...} per transition). No outbound webhooks exist; the only webhook
+    route is INBOUND from payment providers.
+  task_states: [submitted, quoted, payment_required, paid, working, awaiting_human_response, completed, failed, canceled]
+x402:
+  version: 2
+  challenge_header: PAYMENT-REQUIRED
+  retry_header: PAYMENT-SIGNATURE
+  settle_header: PAYMENT-RESPONSE
+  amount_units: atomic units of the asset as a string ("2000" = 0.002 USDC at 6 decimals)
+  max_timeout_seconds: 120
+  discovery: https://a2a.elonsusk.com/.well-known/x402.json
+  observed: POST /x402/util.json.format -> 402; header payload == body; two accepts[] (Base USDC, Solana USDC); facilitator https://facilitator.payai.network
+skill_identity:
+  note: >-
+    The skill id (e.g. util.hash) is the same string in the card's skills[].id, the x402 path segment
+    (/x402/util.hash), the REST body field CreateTaskRequest.skill, the JSON-RPC params.skill, and
+    GET /health skills[]. GET /health lists 30 ids; the card declares 28 (shell.run and file.deliver absent).

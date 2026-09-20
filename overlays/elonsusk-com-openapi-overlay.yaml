@@ -1,0 +1,143 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for the Sandbox Contractor Agent OpenAPI
+  version: 1.0.0
+  description: >-
+    Overlay of what API Evangelist observed on 2026-09-19 that the provider's own OpenAPI 3.1.0 (fetched
+    verbatim from https://a2a.elonsusk.com/openapi.json into openapi/elonsusk-com-openapi.json) does not
+    say: the server URL, the payment gate and its 402 response, the observed 404/405 responses, an audience
+    marking on operator-side routes, and tags. The original is never mutated; apply this overlay to obtain
+    the enhanced document. Every added response was observed live; nothing is asserted that was not seen.
+x-generated: '2026-09-19'
+x-method: generated
+x-source: openapi/elonsusk-com-openapi.json plus live probes recorded in errors/, conformance/ and conventions/
+extends: elonsusk-com-openapi.json
+actions:
+- target: $
+  description: Add the server the spec is served from (the spec declares no servers[]; this is the only host, and the site root and API base coincide on one FastAPI origin).
+  update:
+    servers:
+    - url: https://a2a.elonsusk.com
+      description: Production. The registrable domain elonsusk.com serves nothing; this subdomain is the whole surface.
+    tags:
+    - {name: discovery, description: Well-known documents (A2A agent card, agents manifest, x402 discovery) and health/metrics}
+    - {name: x402, description: Pay-per-call skills gated by the x402 v2 HTTP payment protocol}
+    - {name: tasks, description: Quote-first task API (REST)}
+    - {name: a2a, description: Agent2Agent JSON-RPC 2.0 endpoint}
+    - {name: leads, description: Human lead intake}
+    - {name: operator, description: Operator-side or third-party-integration routes published in the same contract}
+    - {name: showcase, description: Presentational pages for the ZeroClaw bounty submission}
+    x-agent-card: https://a2a.elonsusk.com/.well-known/agent-card.json
+    x-x402-discovery: https://a2a.elonsusk.com/.well-known/x402.json
+- target: $.info
+  update:
+    description: >-
+      HTTP surface of the Sandbox Contractor Agent operated by Artem / A2A Sandbox. No authentication scheme
+      exists; paid operations are gated by payment (x402 v2 PAYMENT-SIGNATURE, or a crypto invoice keyed on
+      the task id). The title "A2A Autonomous Trader Agent" is the FastAPI app's name; the agent card calls
+      the same service "Sandbox Contractor Agent".
+    contact: {name: Artem / A2A Sandbox, url: 'https://a2a.elonsusk.com/'}
+    x-audience-note: Operations tagged operator or showcase are published in the public contract but are not part of the agent-facing surface.
+- target: $.paths['/x402/{skill}'].post
+  update:
+    tags: [x402]
+    x-payment: {protocol: x402, version: 2, challenge_header: PAYMENT-REQUIRED, retry_header: PAYMENT-SIGNATURE, settle_header: PAYMENT-RESPONSE, price_catalog: 'https://a2a.elonsusk.com/.well-known/x402.json'}
+    requestBody:
+      description: Skill input as JSON. The shape is per skill; see the agent card's skills[].exampleInput (e.g. util.hash {algo, data}). Not declared in the provider's spec.
+      required: false
+      content:
+        application/json:
+          schema: {type: object, additionalProperties: true}
+- target: $.paths['/x402/{skill}'].post.responses
+  update:
+    '402':
+      description: Payment required — observed 2026-09-19 on POST /x402/util.json.format without a PAYMENT-SIGNATURE header. The same JSON is base64-encoded in the PAYMENT-REQUIRED response header.
+      headers:
+        PAYMENT-REQUIRED: {description: base64-encoded x402 v2 PaymentRequired JSON (identical to the body), schema: {type: string}}
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [x402Version, error, accepts]
+            properties:
+              x402Version: {type: integer, const: 2}
+              error: {type: string, example: PAYMENT-SIGNATURE header is required}
+              resource: {type: object, properties: {url: {type: string}, description: {type: string}, mimeType: {type: string}}}
+              accepts:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    scheme: {type: string, example: exact}
+                    network: {type: string, description: CAIP-2 chain id, example: 'eip155:8453'}
+                    amount: {type: string, description: atomic units of asset, example: '2000'}
+                    asset: {type: string, description: token contract or mint}
+                    payTo: {type: string}
+                    maxTimeoutSeconds: {type: integer, example: 120}
+                    extra: {type: object, additionalProperties: true}
+              extensions: {type: object, additionalProperties: true, description: 'bazaar (input/output example + JSON Schema) and a2a (agentCard, classicInvoice, flow)'}
+    '404':
+      description: 'Unsupported skill — observed: {"detail":{"error":"unsupported skill: not.a.skill"}}'
+      content: {application/json: {schema: {type: object, properties: {detail: {type: object, properties: {error: {type: string}}}}}}}
+    '405':
+      description: Method Not Allowed — GET on this POST-only route.
+- target: $.paths['/v1/tasks/{task_id}'].get.responses
+  update:
+    '404':
+      description: 'Task not found — observed: {"detail":{"error":"task not found: <id>"}}'
+      content: {application/json: {schema: {type: object, properties: {detail: {type: object, properties: {error: {type: string}}}}}}}
+- target: $.paths['/v1/tasks/{task_id}'].get
+  update:
+    tags: [tasks]
+    x-observed-response-shape: 'Task {id, client_task_id, skill, input, state, created_at, updated_at, quote, invoice, payment, events[], result, artifacts[], error, started_at, completed_at} — see data-model/elonsusk-com-data-model.yml'
+- target: $.paths['/v1/tasks'].post
+  update:
+    tags: [tasks]
+    x-payment: {model: quote-first, invoice_memo: task_id, methods: [SOL, USDC_SOL, ETH, USDC_ETH, BTC]}
+    x-reversibility: {reversal: 'JSON-RPC tasks/cancel on POST /a2a', window: undocumented}
+- target: $.paths['/v1/tasks'].get
+  update:
+    tags: [tasks]
+    x-observation: Unauthenticated; returns every task in the system with inputs, invoice addresses and results.
+- target: $.paths['/a2a'].post
+  update:
+    tags: [a2a]
+    x-jsonrpc-methods: [tasks/send, tasks/get, tasks/cancel]
+    x-jsonrpc-errors: [{code: -32600, message: invalid JSON-RPC version}, {code: -32601, message: 'unknown method: <name>'}, {code: -32602, message: tasks/get requires id or task_id}, {code: 404, message: 'task not found: <id>'}]
+    description: Agent2Agent JSON-RPC 2.0 endpoint declared by the agent card's supportedInterfaces[0]. JSON-RPC errors are returned with HTTP 200.
+- target: $.paths['/v1/leads'].post
+  update: {tags: [leads]}
+- target: $.paths['/v1/tasks/{task_id}/mark-paid'].post
+  update: {tags: [operator], x-audience: operator, description: Marks a task paid with a tx_ref. Published without a securityScheme; verification behaviour is not stated in the contract.}
+- target: $.paths['/v1/payments/webhook/{provider}'].post
+  update: {tags: [operator], x-audience: payment-provider, x-providers: [NOWPayments, CoinGate]}
+- target: $.paths['/.well-known/402index-verify.txt'].get
+  update: {tags: [operator]}
+- target: $.paths['/healthz.earn.superteam'].get
+  update: {tags: [operator]}
+- target: $.paths['/.well-known/agent-card.json'].get
+  update: {tags: [discovery]}
+- target: $.paths['/.well-known/agent.json'].get
+  update: {tags: [discovery], deprecated: false, description: Legacy pre-0.3 agent-card path; still served, identical except url and wellKnownURI.}
+- target: $.paths['/.well-known/agents.json'].get
+  update: {tags: [discovery]}
+- target: $.paths['/.well-known/x402.json'].get
+  update: {tags: [discovery]}
+- target: $.paths['/health'].get
+  update: {tags: [discovery]}
+- target: $.paths['/healthz'].get
+  update: {tags: [discovery]}
+- target: $.paths['/v1/metrics'].get
+  update: {tags: [discovery]}
+- target: $.paths['/'].get
+  update: {tags: [showcase]}
+- target: $.paths['/showcase/zeroclaw'].get
+  update: {tags: [showcase]}
+- target: $.paths['/showcase/zeroclaw/one-pager'].get
+  update: {tags: [showcase]}
+- target: $.paths['/showcase/zeroclaw/readme'].get
+  update: {tags: [showcase]}
+- target: $.paths['/showcase/zeroclaw/video-shot-list'].get
+  update: {tags: [showcase]}
+- target: $.paths['/showcase/zeroclaw/artifacts.zip'].get
+  update: {tags: [showcase]}

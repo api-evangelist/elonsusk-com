@@ -1,18 +1,119 @@
 aid: elonsusk-com
 name: Artem / A2A Sandbox
-description: 'Artem / A2A Sandbox is a company surfaced via the API Evangelist harvest backlog (source:
-  a2a-registry) and added to the network as a stub for full-pipeline profiling.'
+description: >-
+  Artem / A2A Sandbox is a one-operator agent-commerce sandbox that runs a paid "Sandbox Contractor Agent"
+  at a2a.elonsusk.com: an Agent2Agent (A2A) JSON-RPC agent selling 28 skills — keyless developer utilities
+  (JSON/YAML/CSV conversion, hashing incl. keccak256, base64/hex/base58, JWT decode, UUID, semver, epoch),
+  on-chain data reads (EVM and Solana balances, ERC-20 metadata, gas price, transaction status, SPL supply)
+  and security scans (MCP tool-manifest risk, EVM contract bytecode signals) — plus model-backed code review,
+  code generation and inference sold quote-first. Every skill is payable per call over the x402 v2 HTTP
+  payment protocol (HTTP 402 + PAYMENT-REQUIRED challenge, USDC on Base or Solana, from $0.001) at
+  POST /x402/{skill}, or through a classic multi-chain crypto invoice (SOL, USDC, ETH, BTC) on the REST task
+  API. The same FastAPI origin publishes an OpenAPI 3.1.0 contract at /openapi.json with Swagger UI at /docs,
+  an A2A agent card at /.well-known/agent-card.json, an x402 discovery document at /.well-known/x402.json,
+  and live health and revenue-metrics endpoints. The registrable domain elonsusk.com itself serves no
+  website (TLS refused, HTTP 401); the a2a subdomain is the whole public surface.
 url: https://raw.githubusercontent.com/api-evangelist/elonsusk-com/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:a2a-registry
-x-tier: stub
-x-tier-reason: harvest
+x-tier: profiled
+x-tier-reason: enrichment pass 2026-09-19 (local-v3; was a2a-registry harvest stub)
 specificationVersion: '0.20'
 created: '2026-09-19'
 modified: '2026-09-19'
 tags:
-- Company
-apis: []
+- Agents
+- Agent Commerce
+- A2A
+- x402
+- Developer Tools
+- Blockchain
+- Solana
+- Ethereum
+- Security
+- Code Review
+- Code Generation
+- agent-native
+tags_raw:
+- Agents
+- Agent commerce
+- A2A
+- x402
+- Developer tools
+- Blockchain
+- Solana
+- Ethereum
+- Security
+- Code review
+- Code generation
+- Agent-native
+apis:
+- aid: elonsusk-com:sandbox-contractor-agent-rest-api
+  name: Sandbox Contractor Agent REST API
+  description: >-
+    The HTTP surface of the Sandbox Contractor Agent, published as an OpenAPI 3.1.0 document (FastAPI,
+    info.title "A2A Autonomous Trader Agent", version 0.1.0) at https://a2a.elonsusk.com/openapi.json with
+    Swagger UI at /docs and ReDoc at /redoc. 24 operations across 24 paths: the x402 pay-per-call gate
+    POST /x402/{skill} (27 priced skills; an unpaid call returns HTTP 402 with a PAYMENT-REQUIRED header and
+    x402 v2 PaymentRequirements for USDC on Base eip155:8453 and Solana), the quote-first task API
+    (POST /v1/tasks creates a task and returns a quote plus a multi-chain crypto invoice, GET /v1/tasks and
+    GET /v1/tasks/{task_id} read state, POST /v1/tasks/{task_id}/mark-paid), a public lead-intake form
+    (POST /v1/leads), payment-provider webhooks (POST /v1/payments/webhook/{provider} for NOWPayments and
+    CoinGate), the well-known discovery documents (agent card, agents manifest, x402 discovery), live
+    /health, /healthz and /v1/metrics, and a set of showcase pages. No authentication scheme is declared or
+    used; access is gated by payment.
+  humanURL: https://a2a.elonsusk.com/docs
+  baseURL: https://a2a.elonsusk.com
+  tags:
+  - x402
+  - Agent Commerce
+  - Developer Tools
+  - Blockchain
+  - Security
+  properties:
+  - type: OpenAPI
+    url: openapi/elonsusk-com-openapi.json
+  - type: OpenAPI
+    name: Sandbox Contractor Agent OpenAPI (provider-hosted)
+    url: https://a2a.elonsusk.com/openapi.json
+  - type: Documentation
+    url: https://a2a.elonsusk.com/docs
+  - type: APIReference
+    url: https://a2a.elonsusk.com/redoc
+  - type: Overlay
+    url: overlays/elonsusk-com-openapi-overlay.yaml
+  - type: ErrorCatalog
+    url: errors/elonsusk-com-problem-types.yml
+  - type: DataModel
+    url: data-model/elonsusk-com-data-model.yml
+- aid: elonsusk-com:sandbox-contractor-agent-a2a
+  name: Sandbox Contractor Agent (A2A)
+  description: >-
+    Agent2Agent protocol surface: an agent card served from https://a2a.elonsusk.com/.well-known/agent-card.json
+    (and the legacy /.well-known/agent.json) declaring protocolVersion "1.0", JSONRPC transport, version 0.1.0,
+    provider "Artem / A2A Sandbox", 28 skills each carrying inputModes, outputModes, tags, an example and — for
+    the 24 keyless skills — a priceUsd from $0.001 to $0.02. The JSON-RPC 2.0 endpoint at
+    https://a2a.elonsusk.com/a2a implements tasks/send, tasks/get and tasks/cancel (plus message/send and the
+    SendMessage/GetTask/CancelTask aliases per the card's transports block); it answers a live probe with a
+    JSON-RPC error for an unknown task id and -32601 for an unknown method. Streaming and push notifications
+    are declared unsupported; stateTransitionHistory is supported and a nine-state task state machine is
+    published in the card. No securitySchemes: the gate is payment (x402 pay-per-call or a crypto invoice
+    whose memo is the task id).
+  humanURL: https://a2a.elonsusk.com/
+  baseURL: https://a2a.elonsusk.com/a2a
+  tags:
+  - A2A
+  - agent-native
+  - x402
+  - Agent Commerce
+  properties:
+  - type: AgentCard
+    url: a2a/elonsusk-com-a2a.yml
+  - type: AgentCard
+    name: A2A Agent Card (provider-hosted)
+    url: https://a2a.elonsusk.com/.well-known/agent-card.json
+  - type: Documentation
+    url: https://a2a.elonsusk.com/
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -20,4 +121,47 @@ maintainers:
   email: info@apis.io
 common:
 - type: Website
-  url: https://elonsusk.com/
+  url: https://a2a.elonsusk.com/
+- type: Documentation
+  url: https://a2a.elonsusk.com/docs
+- type: APIReference
+  url: https://a2a.elonsusk.com/redoc
+- type: Pricing
+  url: https://a2a.elonsusk.com/
+- type: AgentCard
+  url: a2a/elonsusk-com-a2a.yml
+- type: WellKnown
+  url: well-known/elonsusk-com-well-known.yml
+- type: MCPServer
+  url: mcp/elonsusk-com-mcp.yml
+- type: LLMsTxt
+  url: llms/elonsusk-com-llms.txt
+- type: Authentication
+  url: authentication/elonsusk-com-authentication.yml
+- type: Conventions
+  url: conventions/elonsusk-com-conventions.yml
+- type: ErrorCatalog
+  url: errors/elonsusk-com-problem-types.yml
+- type: DataModel
+  url: data-model/elonsusk-com-data-model.yml
+- type: RateLimits
+  url: rate-limits/elonsusk-com-rate-limits.yml
+- type: Plans
+  url: plans/elonsusk-com-plans-pricing.yml
+- type: Conformance
+  url: conformance/elonsusk-com-conformance.yml
+- type: Lifecycle
+  url: lifecycle/elonsusk-com-lifecycle.yml
+- type: Packages
+  url: packages/elonsusk-com-packages.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: AgenticAccess
+  url: agentic-access/elonsusk-com-agentic-access.yml
+- type: DomainSecurity
+  url: security/elonsusk-com-domain-security.yml
+x-enrichment:
+  date: '2026-09-19'
+  status: enriched
+  artifacts_added: 25
+  pass: local-v3

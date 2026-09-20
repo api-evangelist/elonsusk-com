@@ -1,0 +1,95 @@
+generated: '2026-09-19'
+method: derived
+status: candidate
+source: openapi/elonsusk-com-openapi.json
+docs: https://a2a.elonsusk.com/docs
+summary: >-
+  No MCP server exists. https://a2a.elonsusk.com/mcp and /.well-known/mcp.json both return the app's real
+  JSON 404, no MCP package is published in any registry, and neither the agent card nor the landing page
+  mentions one — although the agent SELLS an MCP-manifest security scan (skill security.mcp_scan, $0.02 per
+  call over x402). The agent's machine surfaces are A2A JSON-RPC and x402 pay-per-call. The tool list below
+  is a CANDIDATE derived one-to-one from the public, non-operator operations in the OpenAPI so that an MCP
+  wrapper could be built; it is not a claim that the provider ships one.
+deployment:
+  mode: none
+  endpoint: null
+  install: null
+  package: null
+  auth: none
+  verified: derived
+  note: >-
+    Derived candidate; nobody ships a server. Probed 2026-09-19: POST-less GET /mcp 404, /.well-known/mcp.json
+    404, /.well-known/oauth-protected-resource 404. If a server were built from this list, its paid tools
+    would inherit the x402 402/PAYMENT-SIGNATURE gate of the underlying operation.
+server:
+  name: elonsusk-com-sandbox-contractor
+  transport: none
+  url: null
+tools:
+- name: get_agent_card
+  description: Fetch the Sandbox Contractor Agent's A2A agent card (28 skills, pricing, payment rails, endpoint map).
+  source_operation: openapi/elonsusk-com-openapi.json#agent_card__well_known_agent_card_json_get
+  cost: free
+- name: get_x402_catalog
+  description: Fetch the x402 v2 discovery document — 27 priced endpoints with networks, payTo, inputSchema and outputSchema.
+  source_operation: openapi/elonsusk-com-openapi.json#x402_discovery__well_known_x402_json_get
+  cost: free
+- name: get_health
+  description: Live health — ok flag, degraded rails (e.g. ollama), queue counts by state, worker concurrency, the 30 skill ids.
+  source_operation: openapi/elonsusk-com-openapi.json#healthz_healthz_get
+  cost: free
+- name: get_metrics
+  description: Public metrics — jobs total/completed/failed, quoted and marked-paid revenue, average latency.
+  source_operation: openapi/elonsusk-com-openapi.json#metrics_v1_metrics_get
+  cost: free
+- name: call_skill_x402
+  description: Invoke one priced skill in a single paid round trip. Without a PAYMENT-SIGNATURE the operation returns 402 + PAYMENT-REQUIRED (the price and rails); with one it settles, creates a paid task and returns the artifact.
+  source_operation: openapi/elonsusk-com-openapi.json#x402_pay_per_call_x402__skill__post
+  inputSchema:
+    type: object
+    properties:
+      skill: {type: string, description: 'Skill id from get_x402_catalog, e.g. util.hash'}
+      input: {type: object, description: 'Skill input; see the card skill exampleInput (e.g. util.hash {algo, data})'}
+      payment_signature: {type: string, description: 'x402 v2 PAYMENT-SIGNATURE header value; omit to receive the 402 challenge'}
+    required: [skill, input]
+  cost: '$0.001-$0.10 per call (USDC on Base or Solana)'
+- name: create_task
+  description: Create a quote-first task; returns the task with a USD quote and a multi-chain crypto invoice (memo = task id). Free to create; sits in payment_required until paid.
+  source_operation: openapi/elonsusk-com-openapi.json#create_task_v1_tasks_post
+  inputSchema:
+    type: object
+    properties:
+      skill: {type: string, default: inference.complete}
+      input: {}
+      client_task_id: {type: [string, 'null']}
+  cost: free to create; quoted price to execute
+- name: get_task
+  description: Read one task by id — state, quote, invoice, payment, events[], result, artifacts.
+  source_operation: openapi/elonsusk-com-openapi.json#get_task_v1_tasks__task_id__get
+  inputSchema: {type: object, properties: {task_id: {type: string}}, required: [task_id]}
+  cost: free
+- name: list_tasks
+  description: List tasks (optionally by state) with queue counts. Note the live endpoint returns every task in the system, not only the caller's.
+  source_operation: openapi/elonsusk-com-openapi.json#list_tasks_v1_tasks_get
+  inputSchema: {type: object, properties: {state: {type: string}, limit: {type: integer, default: 50}}}
+  cost: free
+- name: cancel_task
+  description: Cancel a task via the A2A JSON-RPC endpoint (method tasks/cancel). Which states permit cancellation is undocumented.
+  source_operation: openapi/elonsusk-com-openapi.json#jsonrpc_a2a_post
+  inputSchema: {type: object, properties: {id: {type: string}}, required: [id]}
+  cost: free
+- name: create_lead
+  description: Send a human lead (contact, brief, skill, budget_usd) for a custom quote.
+  source_operation: openapi/elonsusk-com-openapi.json#create_public_lead_v1_leads_post
+  inputSchema:
+    type: object
+    properties:
+      contact: {type: string, minLength: 3, maxLength: 240}
+      brief: {type: string, minLength: 12, maxLength: 8000}
+      skill: {type: string, maxLength: 80, default: code.review}
+      budget_usd: {type: [number, 'null'], minimum: 0, maximum: 100000}
+    required: [contact, brief]
+  cost: free
+excluded_operations:
+  reason: operator-side, third-party-index, or presentational; not agent tools
+  operations: [mark_paid_v1_tasks__task_id__mark_paid_post, payment_webhook_v1_payments_webhook__provider__post, well_known_402index_verify__well_known_402index_verify_txt_get, healthz_earn_superteam_healthz_earn_superteam_get, zeroclaw_showcase_showcase_zeroclaw_get, zeroclaw_one_pager_showcase_zeroclaw_one_pager_get, zeroclaw_readme_showcase_zeroclaw_readme_get, zeroclaw_video_shot_list_showcase_zeroclaw_video_shot_list_get, zeroclaw_artifacts_zip_showcase_zeroclaw_artifacts_zip_get, root__get, health_health_get, agent_card_alias__well_known_agent_json_get, agents_manifest__well_known_agents_json_get]

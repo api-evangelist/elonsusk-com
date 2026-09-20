@@ -1,0 +1,26 @@
+generated: '2026-09-19'
+method: generated
+source: >-
+  openapi/elonsusk-com-openapi.json (every operationId verified against the spec), the agent card's
+  skills[].exampleInput values, /.well-known/x402.json and the live 402 challenge observed 2026-09-19. The
+  provider publishes no skills, AGENTS.md or llms.txt of its own (probed 2026-09-19; /skills, /AGENTS.md
+  and /llms.txt 404).
+skills:
+- file: elonsusk-com-x402-pay-per-call.md
+  name: elonsusk-com-x402-pay-per-call
+  method: generated
+  description: Read the x402 catalog, take the 402 challenge for a skill, pay one rail and retry with PAYMENT-SIGNATURE — the single-round-trip way to buy a utility, on-chain read or security scan.
+  operations: 3
+  operation_ids: [x402_discovery__well_known_x402_json_get, agent_card__well_known_agent_card_json_get, x402_pay_per_call_x402__skill__post]
+- file: elonsusk-com-quote-first-task.md
+  name: elonsusk-com-quote-first-task
+  method: generated
+  description: Create a quoted task, pay its crypto invoice with the task id as memo, poll it to completion, and cancel it over JSON-RPC if you change your mind before paying.
+  operations: 4
+  operation_ids: [create_task_v1_tasks_post, get_task_v1_tasks__task_id__get, jsonrpc_a2a_post, list_tasks_v1_tasks_get]
+- file: elonsusk-com-preflight-agent.md
+  name: elonsusk-com-preflight-agent
+  method: generated
+  description: Before spending, read the card, health and metrics to learn which skills exist, which rails are degraded and what the queue looks like — the model-backed skills depend on a rail that may be down.
+  operations: 4
+  operation_ids: [agent_card__well_known_agent_card_json_get, health_health_get, healthz_healthz_get, metrics_v1_metrics_get]

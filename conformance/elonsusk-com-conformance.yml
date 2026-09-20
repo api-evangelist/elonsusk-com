@@ -1,0 +1,143 @@
+generated: '2026-09-19'
+method: searched
+source: https://a2a.elonsusk.com/.well-known/x402.json
+derived_from: openapi/elonsusk-com-openapi.json
+docs:
+- https://a2a.elonsusk.com/.well-known/agent-card.json
+- https://a2a.elonsusk.com/docs
+summary: >-
+  The Sandbox Contractor Agent's conformance profile is the agent-commerce protocol stack and nothing else:
+  an A2A-shaped agent card (graded conformant with deviations), JSON-RPC 2.0, and — verified live — the x402
+  v2 HTTP payment protocol with a PAYMENT-REQUIRED challenge carrying PaymentRequirements for USDC on Base
+  (CAIP-2 eip155:8453) and Solana, settled through the PayAI facilitator or an on-chain invoice bridge. It
+  publishes its own x402 discovery document at /.well-known/x402.json, which is the contract-level
+  signature for this market. It declares no OAuth/OIDC, no RFC 9457 problem details, no RFC 9116
+  security.txt, no RFC 9727 API catalog, no APIs.json, no RFC 8594 sunset signalling, no MCP server, and no
+  certification or compliance program.
+standards:
+- id: a2a
+  name: Agent2Agent protocol
+  version: '1.0 (as declared; not a published release string)'
+  conforms: true
+  evidence: >-
+    a2a/elonsusk-com-agent-card.json — protocolVersion "1.0", supportedInterfaces[0] {url
+    https://a2a.elonsusk.com/a2a, protocolBinding JSONRPC}, capabilities object, skills[] of 28; POST
+    https://a2a.elonsusk.com/a2a answered tasks/get for an unknown id with a JSON-RPC error and an unknown
+    method with -32601. Graded conformant in a2a/elonsusk-com-a2a.yml.
+  note: >-
+    Self-described schema_version "a2a-like-mvp-1". Method names (tasks/send) and the task-not-found code
+    (404 rather than -32001) follow pre-0.3 drafts; the canonical card's top-level url is the origin rather
+    than the JSON-RPC endpoint. See the deviations list in a2a/.
+- id: x402
+  name: x402 HTTP payment protocol
+  version: '2'
+  conforms: true
+  verification: observed
+  domain_standard_signature: true
+  evidence: >-
+    (1) https://a2a.elonsusk.com/.well-known/x402.json (200, application/json, 21,853 bytes): x402Version 2,
+    headers {challenge PAYMENT-REQUIRED, retry PAYMENT-SIGNATURE, settle PAYMENT-RESPONSE}, flow
+    [challenge, sign, retry, settle], 27 endpoints each with priceUsd, network[] in CAIP-2, rails[] of
+    {network, asset, payTo}, inputSchema and outputSchema. (2) POST https://a2a.elonsusk.com/x402/util.json.format
+    with a JSON body and no payment header returned HTTP 402 with a PAYMENT-REQUIRED response header whose
+    base64 payload decodes to exactly the JSON body: {x402Version 2, error "PAYMENT-SIGNATURE header is
+    required", resource {url, description, mimeType}, accepts [{scheme exact, network eip155:8453, amount
+    "2000", asset 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 (USDC on Base), payTo, maxTimeoutSeconds 120,
+    extra {amountUsd 0.002, facilitator https://facilitator.payai.network, settlement
+    facilitator_or_invoice_bridge, verification evm_rpc}}, {scheme exact, network
+    solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp, asset EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v (USDC on
+    Solana), ...}], extensions {bazaar {info, schema}, a2a {info, schema}}}. (3) The OpenAPI's
+    x402_pay_per_call_x402__skill__post description states "Without PAYMENT-SIGNATURE → 402 + PAYMENT-REQUIRED.
+    With valid signature → settle, create A2A task (marked paid), return receipt + artifact." (4) An unknown
+    skill (POST /x402/not.a.skill) returns 404, so the 402 is per-resource, not a blanket gate.
+  note: >-
+    The challenge leg is fully observed. The sign/retry/settle legs were not exercised because they move
+    funds; the PAYMENT-RESPONSE header and the receipt shape are recorded on the provider's declaration only.
+    This is the domain-standard signature for the agent-commerce market: a discovery document plus a live,
+    per-resource, schema-carrying 402 that a paying agent can act on with no bespoke integration.
+- id: x402-bazaar-extension
+  name: x402 Bazaar discovery extension
+  conforms: true
+  verification: observed
+  evidence: >-
+    The 402 body's extensions.bazaar carries info {input {type http, method POST, body {input {...}},
+    queryParams {}}, output {type json, example {...}}} and a JSON Schema 2020-12 schema for both, plus name,
+    description, priceUsd, tags, provider "a2a-contractor-elonsusk", agentCard and docs links.
+- id: caip-2
+  name: CAIP-2 chain identifiers
+  conforms: true
+  evidence: eip155:8453 (Base) and solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp (Solana mainnet) in every /.well-known/x402.json endpoint and in the live 402 accepts[].
+- id: json-rpc-2.0
+  conforms: true
+  evidence: >-
+    POST /a2a answers {"jsonrpc":"2.0", ...} with -32600 for a missing/invalid version, -32601 for an unknown
+    method and -32602 for missing params. Non-standard: an unknown task id returns code 404.
+- id: openapi-3.1
+  conforms: true
+  version: 3.1.0
+  evidence: openapi/elonsusk-com-openapi.json (fetched from https://a2a.elonsusk.com/openapi.json) — openapi "3.1.0"; parses; 24 paths, 24 operations, 5 component schemas; Swagger UI at /docs and ReDoc at /redoc.
+  gaps:
+  - No servers[] block; the base is recorded from the host it is served on and the card's baseUrl.
+  - No securitySchemes and no security — the contract cannot express that access is payment-gated.
+  - No tags declared or applied; operationIds are FastAPI auto-generated (create_task_v1_tasks_post).
+  - Only 200 and 422 are declared; the 402 on /x402/{skill}, the 404 on unknown tasks/skills and the 405 on wrong methods are all observed and undeclared.
+  - Response schemas are untyped objects (additionalProperties true); the Task, Quote, Invoice and Payment shapes appear only in live responses.
+  - Operator-side operations (mark-paid, payment webhooks, showcase pages, healthz.earn.superteam) are published in the same contract with no audience marking.
+- id: solana-pay
+  name: Solana Pay
+  conforms: false
+  claimed: true
+  evidence: https://a2a.elonsusk.com/showcase/zeroclaw describes "ZeroClaw Solana Cashier" creating Solana Pay invoices and delegating paid tasks to this agent. It is a showcase of a separate component, not a surface of this API; no Solana Pay URL is produced by any operation in the contract.
+- id: mcp
+  name: Model Context Protocol
+  conforms: false
+  evidence: /mcp 404, /.well-known/mcp.json 404. The agent sells an MCP-manifest security scan (security.mcp_scan) but hosts no MCP server.
+- id: oauth2
+  conforms: false
+  evidence: No securityScheme in the contract; /.well-known/oauth-authorization-server 404.
+- id: oidc
+  conforms: false
+  evidence: No openIdConnect securityScheme; /.well-known/openid-configuration 404.
+- id: rfc9728-protected-resource
+  conforms: false
+  evidence: /.well-known/oauth-protected-resource 404 on the resource host.
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: 'Errors are FastAPI-shaped {"detail": ...} — a string ({"detail":"Not Found"}), an object ({"detail":{"error":"task not found: ..."}}) or a validation array. See errors/elonsusk-com-problem-types.yml.'
+- id: rfc9116-security-txt
+  conforms: false
+  evidence: /.well-known/security.txt and /security.txt both 404; the apex refuses TLS.
+- id: rfc9727-api-catalog
+  conforms: false
+  evidence: /.well-known/api-catalog and /.well-known/api-catalog.json both 404.
+- id: apis-json
+  conforms: false
+  evidence: /apis.json, /apis.yml and /.well-known/apis.json all 404.
+- id: llms-txt
+  conforms: false
+  evidence: /llms.txt and /llms-full.txt 404; the file in llms/ was generated by API Evangelist.
+- id: rfc8594-sunset
+  conforms: false
+  evidence: No Sunset or Deprecation header declared or observed; no deprecated operations; no policy page (/changelog, /status 404).
+- id: idempotency-key
+  conforms: false
+  evidence: >-
+    No Idempotency-Key header on any write. CreateTaskRequest has an optional client_task_id whose semantics
+    are undocumented; the x402 accepts[].extra states a tx_ref is "usable for exactly one call"
+    (singleUseTxRef), which prevents double-settlement of one payment but does not make a retried request
+    safe. See conventions/elonsusk-com-conventions.yml.
+- id: pagination
+  conforms: false
+  evidence: GET /v1/tasks takes state and limit (default 50) only — no cursor, offset or page; the response carries no next link.
+- id: ucp
+  conforms: false
+  evidence: /.well-known/ucp.json 404.
+- id: acp
+  name: Agent Commerce Protocol
+  conforms: false
+  evidence: /.well-known/acp.json 404; not named anywhere on the surface.
+compliance_program:
+  published: false
+  note: >-
+    No SOC 2, ISO 27001, PCI DSS or similar certification is claimed anywhere; there is no terms, privacy,
+    security or trust page on the only live host (all 404). No Compliance pointer is emitted.

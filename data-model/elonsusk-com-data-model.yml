@@ -1,0 +1,100 @@
+generated: '2026-09-19'
+method: derived
+source: openapi/elonsusk-com-openapi.json
+docs: https://a2a.elonsusk.com/.well-known/agent-card.json
+summary: >-
+  The contract itself types almost nothing — its 5 component schemas are two request bodies
+  (CreateTaskRequest, PublicLeadRequest), an operator body (MarkPaidRequest) and FastAPI's validation
+  pair; every response is an untyped object. The entity graph below is therefore derived from those
+  schemas PLUS the shapes the live surface returns: the Task object from GET /v1/tasks (one field-complete
+  task was read to learn the shape; no task data was copied), the Skill from the agent card's skills[],
+  the X402Endpoint and PaymentRail from /.well-known/x402.json, and PaymentMethod from the card. One root:
+  the TASK. A task is created for one skill, carries one quote and one invoice, accumulates events and
+  artifacts, and is the unit that payment (invoice or x402) unlocks. Links are by id field, never by $ref.
+id_style:
+  format: opaque strings
+  examples:
+  - {entity: Task, example: UUIDv4 (e.g. 3c3328e9-b4fa-4739-915e-a40fda073093), note: also the invoice memo}
+  - {entity: Skill, example: dotted lowercase id (util.hash, data.evm.native_balance, security.mcp_scan)}
+  - {entity: PaymentRail, example: 'CAIP-2 network id (eip155:8453, solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp) + asset address'}
+  - {entity: PaymentMethod, example: method_id (SOL, USDC_SOL, ETH, USDC_ETH, BTC)}
+entities:
+- name: Task
+  description: One unit of paid work. Created by POST /v1/tasks, A2A tasks/send, or implicitly by a settled x402 call. Moves through the nine-state machine; the state history is in events[].
+  schemas: [CreateTaskRequest]
+  fields: [id, client_task_id, skill, input, state, priority, created_at, updated_at, quote, invoice, payment, events, result, artifacts, error, started_at, completed_at]
+  states: [submitted, quoted, payment_required, paid, working, awaiting_human_response, completed, failed, canceled]
+  relationships:
+  - {belongs_to: Skill, via: skill}
+  - {has_one: Quote, via: quote (embedded)}
+  - {has_one: Invoice, via: invoice (embedded)}
+  - {has_one: Payment, via: payment (embedded)}
+  - {has_many: TaskEvent, via: events (embedded)}
+  - {has_many: Artifact, via: artifacts (embedded)}
+  operations: [create_task_v1_tasks_post, get_task_v1_tasks__task_id__get, list_tasks_v1_tasks_get, mark_paid_v1_tasks__task_id__mark_paid_post, jsonrpc_a2a_post]
+- name: Quote
+  description: The USD price the agent will do the task for, with the metering inputs that produced it.
+  fields: [skill, quote_usd, currency, 'tokens_estimate {input, output}', 'pricing {price_per_1k_tokens_in, price_per_1k_tokens_out, flat_min_usd, skill_multiplier}']
+  relationships:
+  - {belongs_to: Task, via: embedded}
+- name: Invoice
+  description: A crypto invoice for the quote — amount, asset, receiving address, memo (= task id), expiry, checkout provider and status.
+  fields: [amount_usd, asset, address, memo, expires_at, provider, status, note]
+  relationships:
+  - {belongs_to: Task, via: memo}
+  - {belongs_to: PaymentMethod, via: asset}
+- name: Payment
+  description: The confirmation that an invoice (or an x402 settlement) was honoured.
+  fields: [status, confirmed_at, tx_ref, note]
+  schemas: [MarkPaidRequest]
+  relationships:
+  - {belongs_to: Task, via: embedded}
+- name: TaskEvent
+  description: One state transition with its timestamp and, where relevant, the quote or tx_ref that caused it. The card's stateTransitionHistory capability is this array.
+  fields: [at, state, 'quote_usd (optional)', 'tx_ref (optional)']
+  relationships:
+  - {belongs_to: Task, via: embedded}
+- name: Artifact
+  description: A produced file (name, mime type, size) attached to a completed task. The live object also carries the operator's local storage path.
+  fields: [name, path, mime_type, bytes]
+  relationships:
+  - {belongs_to: Task, via: embedded}
+- name: Skill
+  description: A sellable capability. 28 declared in the agent card (30 live per GET /health). The id is the same string in the x402 path, the REST body, the JSON-RPC params and the card.
+  source: a2a/elonsusk-com-agent-card.json skills[]
+  fields: [id, name, description, tags, 'priceUsd (optional)', 'exampleInput (optional)', inputModes, outputModes, examples]
+  relationships:
+  - {has_many: Task, via: skill}
+  - {has_one: X402Endpoint, via: '/x402/{id}'}
+- name: X402Endpoint
+  description: The priced, pay-per-call door for one skill, as published in /.well-known/x402.json (27 entries plus /v1/tasks).
+  source: well-known/elonsusk-com-x402.json endpoints[]
+  fields: [path, method, description, priceUsd, 'network (array)', 'rails (array)', asset, payTo, tags, inputSchema, outputSchema, status]
+  relationships:
+  - {belongs_to: Skill, via: path segment}
+  - {has_many: PaymentRail, via: rails (embedded)}
+- name: PaymentRail
+  description: One (network, asset, payTo) triple an x402 payment can settle on — USDC on Base or USDC on Solana.
+  fields: [network (CAIP-2), asset, payTo]
+  relationships:
+  - {belongs_to: X402Endpoint, via: embedded}
+- name: PaymentMethod
+  description: One invoice method the quote-first flow accepts — SOL, USDC on Solana, ETH, USDC on Ethereum, BTC.
+  source: a2a/elonsusk-com-agent-card.json payment_methods[]
+  fields: [method_id, enabled, chain, asset, 'mint (optional)', 'contract (optional)']
+  relationships:
+  - {has_many: Invoice, via: asset}
+- name: Lead
+  description: A human enquiry for a custom quote.
+  schemas: [PublicLeadRequest]
+  fields: [contact, brief, skill, budget_usd, source]
+  relationships:
+  - {belongs_to: Skill, via: skill}
+  operations: [create_public_lead_v1_leads_post]
+- name: ValidationError
+  description: FastAPI's 422 detail entry.
+  schemas: [HTTPValidationError, ValidationError]
+  fields: [loc, msg, type, input, ctx]
+component_schemas: [CreateTaskRequest, HTTPValidationError, MarkPaidRequest, PublicLeadRequest, ValidationError]
+ref_links_in_contract: 1
+ref_links_note: The only $ref edge in the contract is HTTPValidationError.detail[] -> ValidationError. Every other relationship above is by id field or embedding, learned from live responses.

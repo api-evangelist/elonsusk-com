@@ -1,0 +1,14 @@
+generated: '2026-09-19'
+method: searched
+source: registry searches 2026-09-19
+package_count: 0
+packages: []
+searched:
+- {registry: github, query: 'https://api.github.com/search/repositories?q=elonsusk', result: 0 repositories}
+- {registry: github-user, query: 'https://api.github.com/users/elonsusk', result: 'an account created 2022-02-28 with 0 public repositories, no name, blog or bio — cannot be tied to this provider and publishes nothing; not linked'}
+- {registry: github-code-search, query: 'https://api.github.com/search/code?q=a2a.elonsusk.com', status: 401, note: 'code search requires authentication; not run'}
+- {registry: docs, query: 'https://a2a.elonsusk.com/ landing page and agent card', result: 'no SDK, CLI or client library referenced; the documented way in is curl against REST, JSON-RPC or x402'}
+note: >-
+  The provider publishes no client library, CLI or SDK in any registry searched and references none on its
+  surface. The agent card's examples are raw curl. No Packages/SDKs pointer credit is claimed; this file
+  records the search.

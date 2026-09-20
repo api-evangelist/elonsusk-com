@@ -1,0 +1,50 @@
+generated: '2026-09-19'
+method: searched
+source: https://a2a.elonsusk.com/openapi.json
+derived_from: openapi/elonsusk-com-openapi.json
+docs:
+- https://a2a.elonsusk.com/.well-known/agent-card.json
+versioning:
+  scheme: URL prefix on the REST task API (/v1/); unversioned everywhere else
+  current_version: 0.1.0 (OpenAPI info.version and agent card version); card schema_version "a2a-like-mvp-1"; A2A protocolVersion "1.0"
+  spec_url: https://a2a.elonsusk.com/openapi.json
+  base_url: https://a2a.elonsusk.com
+  policy_published: false
+  note: >-
+    /v1/tasks, /v1/leads, /v1/metrics and /v1/payments carry a v1 segment; /a2a, /x402/{skill}, /health and
+    the well-known documents do not. The OpenAPI title ("A2A Autonomous Trader Agent") and the card name
+    ("Sandbox Contractor Agent") differ, and /healthz.earn.superteam reports a third identity
+    ("a2a-autonomous-contractor", version "a2a-earn-agent-production") — one codebase wearing several
+    names. No versioning policy, changelog or release notes exist on the host (/changelog 404).
+deprecation:
+  policy_published: false
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  deprecated_operations: []
+  documented_retirements: []
+  note: >-
+    Zero operations carry deprecated: true; no Sunset/Deprecation headers were observed on any response; no
+    policy page exists. The legacy /.well-known/agent.json is still served alongside the canonical card with
+    no deprecation signal. No Deprecation pointer is emitted.
+status_page:
+  url: null
+  probed:
+  - {url: 'https://a2a.elonsusk.com/status', status: 404}
+  live_signal:
+    url: https://a2a.elonsusk.com/healthz
+    status: 200
+    observed: >-
+      {"ok":true,"degraded":["ollama"],"started_at":"2026-09-19T06:58:21+00:00","uptime_seconds":62599,
+      "ollama":{"ok":false,...},"queue":{"by_state":{"completed":11,"failed":4,"canceled":2,"payment_required":44},
+      "paid_waiting":0,"working":0},"worker":{"max_concurrent_jobs":3,"running":0,"busy":false},
+      "payment_watcher":{"enabled":true,"provider":"solana_rpc",...}, ...}
+    note: >-
+      A live, unauthenticated health document (also GET /health with the skill list, and GET /v1/metrics with
+      job counts, latency and revenue) — a process-level heartbeat, not a status page: no incident history, no
+      uptime commitment, no component SLAs. At probe time the local model rail (ollama) was degraded, which
+      the four model-backed skills' own descriptions anticipate ("delivered when a rail is up"). No StatusPage
+      pointer is emitted.
+sla:
+  published: false
+  note: No SLA, support hours or response-time commitment is published. The card's pricing offers a "Rush 1hr" package ($100, priority multiplier 8x) described on the landing page as "Priority queue plus operator escalation", which is a service tier rather than an SLA.

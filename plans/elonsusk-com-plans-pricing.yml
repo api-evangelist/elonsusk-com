@@ -1,0 +1,102 @@
+generated: '2026-09-19'
+method: searched
+source: https://a2a.elonsusk.com/.well-known/agent-card.json
+docs:
+- https://a2a.elonsusk.com/
+- https://a2a.elonsusk.com/.well-known/x402.json
+plan_count: 3
+currency: USD
+model: >-
+  Pay-per-use in crypto, two ways: (a) x402 pay-per-call micropayments per skill, priced in USD and settled
+  in USDC on Base or Solana at call time; (b) quote-first tasks — POST /v1/tasks (or A2A tasks/send)
+  returns a USD quote and a multi-chain invoice (SOL, USDC on Solana, ETH, USDC on Ethereum, BTC) with the
+  task id as the required memo, and the work starts once the payment watcher or a provider webhook marks it
+  paid. Three fixed packages sit on top of the quote model. No subscription, no account, no fiat.
+summary: >-
+  Prices below are read from the agent card's pricing block, the per-skill priceUsd fields, the landing
+  page's package cards and /.well-known/x402.json, all fetched 2026-09-19. The card's flat_min_usd is 1.0;
+  the one publicly visible completed task (a shell.run smoke test from 2026-07-20) was quoted with
+  flat_min_usd 0.25, so the minimum has been raised since. Token metering applies to the model-backed
+  skills; the 24 keyless skills are flat per call.
+plans:
+- id: quick_review
+  name: Quick Review
+  price: 5
+  currency: USD
+  period: per task
+  applies_to: [code.review]
+  included: Prioritized findings, risk notes, and next patch suggestions.
+  source: https://a2a.elonsusk.com/ (package card) and agent card pricing.packages.quick_review_usd
+- id: full_code_gen
+  name: Full Code Gen
+  price: 25
+  currency: USD
+  period: per task
+  applies_to: [code.generate]
+  included: Contained implementation or fix with artifact delivery.
+  source: https://a2a.elonsusk.com/ and agent card pricing.packages.full_code_gen_usd
+- id: rush_1hr
+  name: Rush 1hr
+  price: 100
+  currency: USD
+  period: per task
+  included: Priority queue plus operator escalation for high-value work.
+  source: https://a2a.elonsusk.com/ and agent card pricing.packages.rush_1hr_usd
+  note: The landing page also offers "Custom quote" via the human lead-intake form (POST /v1/leads with contact, brief, skill, budget_usd).
+metered_quote:
+  price_per_1k_tokens_in: 0.05
+  price_per_1k_tokens_out: 0.20
+  flat_min_usd: 1.0
+  skill_multipliers: {code.generate: 1.2, code.review: 1.0, shell.run: 0.6, file.deliver: 0.4, inference.complete: 1.0, external.llm.delegate: 4.0, batch.discount: 0.8}
+  priority_multipliers: {normal: 1.0, priority: 3.0, rush: 8.0}
+  source: agent card pricing block
+  note: The quote formula itself is not published; only its inputs are. The observed quote object carries tokens_estimate {input, output}, pricing {price_per_1k_tokens_in, price_per_1k_tokens_out, flat_min_usd, skill_multiplier} and quote_usd.
+per_call_prices:
+  protocol: x402 v2
+  networks: [eip155:8453 (USDC 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913), 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp (USDC EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v)']
+  facilitator: https://facilitator.payai.network
+  source: https://a2a.elonsusk.com/.well-known/x402.json endpoints[] (27) — confirmed live for util.json.format (402 amount "2000" = $0.002)
+  prices_usd:
+    code.generate: 0.10
+    code.review: 0.01
+    inference.complete: 0.02
+    security.mcp_scan: 0.02
+    security.evm.contract_signals: 0.004
+    util.csv.to_json: 0.003
+    util.jwt.decode: 0.003
+    util.json.format: 0.002
+    util.json.to_yaml: 0.002
+    util.yaml.to_json: 0.002
+    util.base64: 0.002
+    util.hex: 0.002
+    util.base58: 0.002
+    util.hash: 0.002
+    util.uuid: 0.002
+    util.solana.address.validate: 0.002
+    util.time.epoch: 0.002
+    util.semver.compare: 0.002
+    data.evm.erc20_balance: 0.002
+    data.evm.erc20_metadata: 0.002
+    data.evm.tx_status: 0.002
+    data.solana.spl_balance: 0.002
+    data.solana.token_supply: 0.002
+    data.evm.gas_price: 0.001
+    data.evm.native_balance: 0.001
+    data.solana.balance: 0.001
+  note: >-
+    /v1/tasks appears as a 28th x402.json entry with status "live_via_a2a_invoice" and no price — the
+    quote-first door. Skills external.llm.delegate, batch.discount, shell.run and file.deliver have no x402
+    price and are quote-only.
+invoice_payment_methods:
+- {method_id: SOL, chain: solana, asset: SOL}
+- {method_id: USDC_SOL, chain: solana, asset: USDC, mint: EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v}
+- {method_id: ETH, chain: ethereum, asset: ETH}
+- {method_id: USDC_ETH, chain: ethereum, asset: USDC, contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'}
+- {method_id: BTC, chain: bitcoin, asset: BTC}
+invoice_notes:
+  memo_required: true
+  memo_field: task_id
+  checkout_providers: [NOWPayments, CoinGate]
+  source: agent card payment_methods / payment_notes
+free_tier: none
+refund_policy: not published

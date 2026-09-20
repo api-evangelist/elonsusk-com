@@ -1,0 +1,261 @@
+generated: '2026-09-19'
+method: probed
+source: https://a2a.elonsusk.com/.well-known/agent-card.json
+card:
+  file: a2a/elonsusk-com-agent-card.json
+discovery:
+  path: /.well-known/agent-card.json
+  canonical: true
+  host: a2a.elonsusk.com
+  note: >-
+    Served from the a2a subdomain, which is the ONLY host this provider operates: the registrable domain
+    elonsusk.com refuses TLS on 443 outright (curl exit 7, connection refused; the A record 178.105.215.168 is
+    a residential/ISP address) and answers HTTP 401 on port 80, and www.elonsusk.com behaves the same. Both
+    the canonical /.well-known/agent-card.json and the legacy /.well-known/agent.json return 200
+    application/json on a2a.elonsusk.com; the two bodies are identical except that the legacy card's
+    top-level url is https://a2a.elonsusk.com/a2a (the JSON-RPC endpoint) where the canonical card's url is
+    the bare origin https://a2a.elonsusk.com, and each names itself in wellKnownURI. A negative-control path
+    (/.well-known/apievangelist-negative-control-7f3a.json) returns the app's real JSON 404
+    ({"detail":"Not Found"}, 22 bytes), so the 200s are served documents, not a catch-all. Ownership is not
+    in question: provider.organization is "Artem / A2A Sandbox" with provider.url https://a2a.elonsusk.com,
+    the OpenAPI at the same origin declares the agent-card, agents-manifest and x402-discovery routes as
+    operations, /.well-known/x402.json points back at this card, and the card's endpoints block names every
+    other route this origin serves.
+x-evidence:
+  fetched: '2026-09-19'
+  url: https://a2a.elonsusk.com/.well-known/agent-card.json
+  http_status: 200
+  content_type: application/json
+  body_bytes: 22836
+  body_parses_as: >-
+    JSON object with AgentCard shape (name, url, version, protocolVersion, preferredTransport, capabilities,
+    skills, provider, documentationUrl, defaultInputModes, defaultOutputModes, supportedInterfaces,
+    securitySchemes, security) plus a large non-standard tail (endpoints, transports, pricing,
+    payment_methods, payment_notes, how_to_order, task_state_machine, jsonrpc_methods, capabilityTags,
+    registryTags, schema_version "a2a-like-mvp-1").
+  corroborating_probes:
+  - url: https://a2a.elonsusk.com/.well-known/agent.json
+    http_status: 200
+    note: Legacy path, also served; identical body except url (/a2a) and wellKnownURI.
+  - url: https://a2a.elonsusk.com/.well-known/agents.json
+    http_status: 200
+    note: A one-entry agents manifest (schema_version a2a-agents-manifest-1) wrapping the same card. Saved to well-known/elonsusk-com-agents.json.
+  - url: https://elonsusk.com/.well-known/agent-card.json
+    http_status: 0
+    note: TLS connection refused on the apex; the same for /.well-known/agent.json and for www.elonsusk.com.
+  - url: https://a2a.elonsusk.com/a2a
+    method: POST
+    body: '{"jsonrpc":"2.0","id":1,"method":"tasks/get","params":{"id":"apievangelist-nonexistent-probe"}}'
+    http_status: 200
+    response: '{"jsonrpc":"2.0","id":1,"error":{"code":404,"message":"task not found: apievangelist-nonexistent-probe"}}'
+    note: A live JSON-RPC 2.0 responder. The error code is an HTTP-style 404, not the A2A-defined -32001 TaskNotFoundError. No message was sent, no task was created and nothing was purchased.
+  - url: https://a2a.elonsusk.com/a2a
+    method: POST
+    body: '{"jsonrpc":"2.0","id":2,"method":"agent/getAuthenticatedExtendedCard","params":{}}'
+    http_status: 200
+    response: '{"jsonrpc":"2.0","id":2,"error":{"code":-32601,"message":"unknown method: agent/getAuthenticatedExtendedCard"}}'
+  - url: https://a2a.elonsusk.com/a2a
+    method: POST
+    body: '{"jsonrpc":"2.0","id":10,"method":"tasks/get","params":{}}'
+    http_status: 200
+    response: '{"jsonrpc":"2.0","id":10,"error":{"code":-32602,"message":"tasks/get requires id or task_id"}}'
+  - url: https://a2a.elonsusk.com/a2a
+    method: POST
+    body: '{"foo":1}'
+    http_status: 200
+    response: '{"jsonrpc":"2.0","id":null,"error":{"code":-32600,"message":"invalid JSON-RPC version"}}'
+  - url: https://a2a.elonsusk.com/
+    method: POST
+    body: '{"jsonrpc":"2.0","id":9,"method":"tasks/get","params":{"id":"apievangelist-nonexistent-probe"}}'
+    http_status: 405
+    note: >-
+      The canonical card's top-level url is the bare origin; POSTing JSON-RPC there returns
+      {"detail":"Method Not Allowed"}. A 0.3-style client that honours url + preferredTransport and ignores
+      supportedInterfaces[] cannot reach the agent from the canonical card; it can from the legacy card.
+  - url: https://a2a.elonsusk.com/x402/util.json.format
+    method: POST
+    http_status: 402
+    note: >-
+      The x402 pay-per-call gate the card advertises is live: HTTP 402 with a PAYMENT-REQUIRED header whose
+      base64 payload equals the JSON body (x402Version 2, accepts[] for USDC on eip155:8453 and Solana, payTo
+      addresses, facilitator https://facilitator.payai.network). Recorded in conformance/ and conventions/.
+  - url: https://a2aregistry.org
+    note: >-
+      The card was first seen as one of 415 agents listed on a2aregistry.org (fetched 2026-09-19, author
+      "Artem / A2A Sandbox", agent "Sandbox Contractor Agent"), which is how this provider entered the harvest
+      backlog. The registry listing was the lead; the card above was fetched directly from the provider's host.
+agent_card:
+  name: Sandbox Contractor Agent
+  description: >-
+    Autonomous contractor agent selling keyless, no-model services over x402 pay-per-call (from $0.001):
+    developer utilities, on-chain EVM/Solana data reads, and MCP-manifest / EVM-contract security scans, plus
+    model-backed code review, code generation and inference sold quote-first through a crypto invoice.
+  url: https://a2a.elonsusk.com
+  jsonrpc_endpoint: https://a2a.elonsusk.com/a2a
+  version: 0.1.0
+  protocol_version: '1.0'
+  preferred_transport: JSONRPC
+  provider:
+    organization: Artem / A2A Sandbox
+    url: https://a2a.elonsusk.com
+  documentation_url: https://a2a.elonsusk.com/
+  capabilities:
+    streaming: false
+    push_notifications: false
+    state_transition_history: true
+    extensions: []
+  default_input_modes: [text/plain, application/json]
+  default_output_modes: [text/plain, text/markdown, application/json]
+  security_schemes: {}
+  security: []
+  supported_interfaces:
+  - {url: 'https://a2a.elonsusk.com/a2a', protocolBinding: JSONRPC, protocolVersion: '1.0'}
+  jsonrpc_methods: [tasks/send, tasks/get, tasks/cancel]
+  transport_methods_declared: [SendMessage, GetTask, CancelTask, message/send, tasks/send, tasks/get, tasks/cancel]
+  task_states: [submitted, quoted, payment_required, paid, working, awaiting_human_response, completed, failed, canceled]
+  skill_count: 28
+  skills:
+  - {id: code.generate, name: Code Generation, tags: [code, generation, fix], model_backed: true, x402_price_usd: 0.10}
+  - {id: code.review, name: Code Review, tags: [code, review, quality], model_backed: true, x402_price_usd: 0.01}
+  - {id: inference.complete, name: Inference, tags: [inference, completion], model_backed: true, x402_price_usd: 0.02}
+  - {id: external.llm.delegate, name: Human Escalation, tags: [escalation, human-in-the-loop, delegate], model_backed: true}
+  - {id: batch.discount, name: Batch Discount, tags: [batch, pricing, discount]}
+  - {id: util.json.format, name: Json Format, price_usd: 0.002}
+  - {id: util.json.to_yaml, name: Json To Yaml, price_usd: 0.002}
+  - {id: util.yaml.to_json, name: Yaml To Json, price_usd: 0.002}
+  - {id: util.csv.to_json, name: Csv To Json, price_usd: 0.003}
+  - {id: util.base64, name: Base64, price_usd: 0.002}
+  - {id: util.hex, name: Hex, price_usd: 0.002}
+  - {id: util.base58, name: Base58, price_usd: 0.002}
+  - {id: util.hash, name: Hash, price_usd: 0.002}
+  - {id: util.uuid, name: Uuid, price_usd: 0.002}
+  - {id: util.jwt.decode, name: Jwt Decode, price_usd: 0.003}
+  - {id: util.solana.address.validate, name: Solana Address Validate, price_usd: 0.002}
+  - {id: util.time.epoch, name: Time Epoch, price_usd: 0.002}
+  - {id: util.semver.compare, name: Semver Compare, price_usd: 0.002}
+  - {id: data.evm.native_balance, name: Evm Native Balance, price_usd: 0.001}
+  - {id: data.evm.erc20_balance, name: Evm Erc20 Balance, price_usd: 0.002}
+  - {id: data.evm.erc20_metadata, name: Evm Erc20 Metadata, price_usd: 0.002}
+  - {id: data.evm.gas_price, name: Evm Gas Price, price_usd: 0.001}
+  - {id: data.evm.tx_status, name: Evm Tx Status, price_usd: 0.002}
+  - {id: data.solana.balance, name: Solana Balance, price_usd: 0.001}
+  - {id: data.solana.token_supply, name: Solana Token Supply, price_usd: 0.002}
+  - {id: data.solana.spl_balance, name: Solana Spl Balance, price_usd: 0.002}
+  - {id: security.mcp_scan, name: Mcp Scan, price_usd: 0.02}
+  - {id: security.evm.contract_signals, name: Evm Contract Signals, price_usd: 0.004}
+  skill_invocation: >-
+    Every skill's examples[] entry names the same two doors: "x402 pay-per-call: POST /x402/<skill id>
+    (standard x402 v2; settles via PayAI facilitator on Base USDC)" or "classic task: POST /v1/tasks
+    {"skill":"<skill id>","input":{...}}". Over A2A the skill id travels as params.skill on tasks/send. The
+    24 keyless skills carry a priceUsd on the skill itself and an exampleInput; the four model-backed skills
+    and batch.discount carry no price on the skill and are quoted per task (see plans/).
+  skills_not_in_card:
+  - shell.run
+  - file.deliver
+  note_on_missing_skills: >-
+    GET /health lists 30 skills and the landing page's skill selector offers all 30, but the card declares
+    28 — shell.run and file.deliver are absent from skills[] while still appearing in pricing.skill_multipliers
+    (0.6 and 0.4). The one task the public task list shows as completed is a shell.run smoke test. An A2A
+    client reading only the card cannot discover those two skills.
+conformance:
+  spec: A2A 1.0.0
+  grade: conformant
+  protocol_version: '1.0'
+  preferred_transport: JSONRPC
+  hard_checks:
+    capabilities_is_object: true
+    protocol_version_present: true
+    skills_is_array: true
+  optional_fields:
+    default_input_modes: true
+    default_output_modes: true
+    preferred_transport: true
+  grade_basis: >-
+    Graded against the A2A 1.0.0 hard checks. capabilities is an OBJECT (pass) with streaming,
+    pushNotifications and stateTransitionHistory. protocolVersion is present at the top level (pass),
+    declared as "1.0". skills is an ARRAY (pass) of 28 skills, each with id, name, description, tags,
+    inputModes, outputModes and examples. All three optional discriminators are present. The card carries
+    BOTH shapes at once — the 0.3-style top-level url/preferredTransport/protocolVersion triple AND a 1.0-style
+    supportedInterfaces[] block — so it passes the structural checks under either reading. The deviations
+    below are real, and several would trip a strict client, but none is a hard-check failure.
+  deviations:
+  - field: schema_version
+    observed: '"a2a-like-mvp-1"'
+    note: >-
+      The card describes itself as "A2A-like", which is candid: the JSON-RPC method set and several error
+      codes follow pre-0.3 A2A drafts rather than any published release.
+  - field: protocolVersion
+    observed: '"1.0"'
+    note: >-
+      Not a published A2A version string; the specification's releases are 0.2.x, 0.3.0 and 1.0.0. A client
+      matching on an exact version will not match. The card also duplicates the value in a snake_case
+      protocol_version and preferred_transport pair, which no A2A revision defines.
+  - field: url
+    observed: 'https://a2a.elonsusk.com (canonical card) vs https://a2a.elonsusk.com/a2a (legacy card and supportedInterfaces[0].url)'
+    note: >-
+      On the canonical card the top-level url is the bare origin, and a JSON-RPC POST to it returns 405
+      Method Not Allowed. The JSON-RPC endpoint is only correct in supportedInterfaces[0].url and on the
+      legacy /.well-known/agent.json. A 0.3-style client following url from the canonical path cannot reach
+      the agent.
+  - field: jsonrpc_methods / transports[0].methods
+    observed: 'tasks/send, tasks/get, tasks/cancel (plus SendMessage/GetTask/CancelTask and message/send aliases listed in transports)'
+    note: >-
+      tasks/send is the pre-0.3 method name; A2A 0.3.0 and 1.0.0 use message/send. The transports block
+      claims message/send is also accepted, which was not exercised (it would create a task). Neither
+      tasks/resubscribe, tasks/pushNotificationConfig/* nor agent/getAuthenticatedExtendedCard is
+      implemented (the last returns -32601, consistent with the card not declaring extended-card support).
+  - field: JSON-RPC error codes
+    observed: 'code 404 "task not found" for an unknown task id'
+    note: >-
+      A2A defines -32001 TaskNotFoundError. The responder is otherwise JSON-RPC 2.0-correct (-32600 for a bad
+      envelope, -32601 for an unknown method, -32602 for missing params).
+  - field: securitySchemes / security
+    observed: '{} and []'
+    note: >-
+      No authentication scheme at all, and unlike a card using the a2a-x402 extension, no
+      capabilities.extensions[] entry declares the payment protocol either. The x402 requirement is stated
+      out of band — in capabilityTags ("x402_pay_per_call", "standard_x402_v2"), in each skill's examples[]
+      prose, in the non-standard pricing/payment_methods/how_to_order blocks, and in the separate
+      /.well-known/x402.json document. An A2A client cannot learn from the standard fields that payment is
+      the access model.
+  - field: skills[].priceUsd / exampleInput
+    observed: present on 24 skills
+    note: Non-standard skill fields. Useful, and consistent with /.well-known/x402.json, but outside the AgentSkill schema.
+  - field: skills[]
+    observed: 28 declared; the service exposes 30
+    note: shell.run and file.deliver are missing from the card (see skills_not_in_card).
+  - field: capabilities.extensions / signatures / iconUrl
+    observed: absent
+    note: No extensions, no JWS signature block; the card's authenticity rests on TLS to a2a.elonsusk.com (Cloudflare-fronted).
+  - field: non-standard top-level keys
+    observed: endpoints, transports, interfaces, auth, capabilityTags, legacy_capabilities, pricing, registryTags, payment_methods, payment_notes, how_to_order, task_state_machine, jsonrpc_methods, apiEndpoint, baseUrl, homepage, author, wellKnownURI
+    note: >-
+      Roughly two thirds of the 22.8 KB card is outside the AgentCard schema. Much of it is genuinely useful
+      (a full endpoint map, the task state machine, the payment rails), but it is unreadable to a schema-
+      strict client and duplicates what /.well-known/x402.json and the OpenAPI already publish.
+surface_relationship:
+  note: >-
+    Three doors onto one task queue, all on a2a.elonsusk.com. A2A JSON-RPC at /a2a (tasks/send, tasks/get,
+    tasks/cancel); REST at /v1/tasks (create returns a quote and a multi-chain crypto invoice keyed on the
+    task id as memo, poll GET /v1/tasks/{id}); and x402 pay-per-call at POST /x402/{skill}, which on a valid
+    PAYMENT-SIGNATURE "settles, creates an A2A task (marked paid), returns receipt + artifact" per the
+    contract. The OpenAPI (openapi/elonsusk-com-openapi.json) describes all three plus the discovery
+    documents; /.well-known/x402.json describes the 27 priced endpoints with JSON Schema input/output; the
+    card describes the 28 skills. No MCP server is hosted (/mcp and /.well-known/mcp.json 404) although the
+    agent sells an MCP-manifest security scan as a skill. The ZeroClaw page at /showcase/zeroclaw describes a
+    separate Solana Pay cashier that "delegates paid tasks to the live A2A contractor" — a bounty submission
+    built on top of this agent, not a second agent.
+observations:
+- >-
+  GET /v1/tasks is unauthenticated and returns the entire task history (61 tasks at probe time, ~700 KB)
+  including each task's input, quote, invoice address and memo, payment notes and result, and artifact
+  entries whose path field is the operator's local Windows filesystem path. Nothing was copied from it into
+  this repo beyond the shape recorded in data-model/.
+- >-
+  POST /v1/tasks/{task_id}/mark-paid and POST /v1/payments/webhook/{provider} are in the public contract
+  with no securityScheme; whether they verify a signature server-side is not stated in the contract.
+- >-
+  /healthz reports ollama degraded (the local model rail behind the four model-backed skills), so at probe
+  time code.review, code.generate, inference.complete and external.llm.delegate were "delivered when a rail
+  is up", exactly as their card descriptions say. /v1/metrics is public and reports 61 jobs, 11 completed,
+  $0.01 of external real revenue against a $100 target.

@@ -1,0 +1,165 @@
+generated: '2026-09-19'
+method: probed
+source: >-
+  Live GET probes of the named /.well-known/* path list on elonsusk.com, www.elonsusk.com and
+  a2a.elonsusk.com, 2026-09-19. Every row below is a request that was actually issued; every status is the
+  one returned. Status 0 means the TCP/TLS connection was refused before any HTTP status could be observed.
+summary:
+  hosts_probed: 3
+  paths_probed: 51
+  documents_served: 4
+  hit_count: 4
+  path_echo_control: passed
+  note: >-
+    Only a2a.elonsusk.com answers at all. It serves four real /.well-known/ documents — the A2A agent card at
+    both the canonical and legacy paths, a one-agent agents manifest, and an x402 v2 discovery document — and
+    returns the FastAPI app's real JSON 404 ({"detail":"Not Found"}, 22 bytes, application/json) for every
+    other named path; a negative-control path that cannot exist also 404s, so the 200s are served documents.
+    None of the standard security/identity documents exist: no RFC 9116 security.txt, no OAuth/OIDC
+    discovery, no RFC 9728 protected-resource metadata, no RFC 9727 API catalog, no APIs.json at any of its
+    three locations, no AAuth resource document, no ai-plugin, no UCP/ACP manifest, no MCP server card. The
+    registrable domain and its www host refuse TLS on 443 (curl exit 7, connection refused) and the apex
+    answers HTTP 401 on port 80, so no document can be served from them. There is no MCP server host to add
+    to the set (/mcp and /.well-known/mcp.json 404 on the only live host).
+hosts:
+- host: a2a.elonsusk.com
+  role: Website, API (OpenAPI host), A2A JSON-RPC host and x402 resource server — one FastAPI origin behind Cloudflare
+  documents:
+  - path: /.well-known/agent-card.json
+    status: 200
+    content_type: application/json
+    bytes: 22836
+    file: ../a2a/elonsusk-com-agent-card.json
+    standard: A2A Agent Card (protocolVersion "1.0")
+    note: Saved verbatim under a2a/ and graded in a2a/elonsusk-com-a2a.yml (conformant, with deviations).
+  - path: /.well-known/agent.json
+    status: 200
+    content_type: application/json
+    bytes: 22835
+    standard: A2A Agent Card (legacy pre-0.3 path)
+    note: Identical to the canonical card except url (https://a2a.elonsusk.com/a2a) and wellKnownURI. Not saved separately.
+  - path: /.well-known/agents.json
+    status: 200
+    content_type: application/json
+    bytes: 22889
+    file: elonsusk-com-agents.json
+    standard: agents manifest (schema_version a2a-agents-manifest-1, non-standard)
+    note: A one-entry list wrapping the same card body.
+  - path: /.well-known/x402.json
+    status: 200
+    content_type: application/json
+    bytes: 21853
+    file: elonsusk-com-x402.json
+    standard: x402 v2 discovery document (x402Version 2)
+    note: >-
+      Names the challenge/retry/settle headers (PAYMENT-REQUIRED / PAYMENT-SIGNATURE / PAYMENT-RESPONSE), the
+      settlement modes, and 27 priced endpoints with CAIP-2 networks, USDC asset addresses, payTo addresses and
+      JSON Schema inputSchema/outputSchema. Its claims were verified live against POST /x402/util.json.format
+      (402 + PAYMENT-REQUIRED). See conformance/.
+  - path: /.well-known/402index-verify.txt
+    status: 200
+    content_type: text/plain; charset=utf-8
+    bytes: 65
+    note: A 64-hex-character verification token for a third-party x402 index (declared as an operation in the OpenAPI). Not a discovery document; not saved.
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    note: This host is the x402 resource server and the A2A endpoint; no RFC 9728 metadata is served for either.
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/api-catalog.json
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /ai-plugin.json
+    status: 404
+  - path: /.well-known/ucp.json
+    status: 404
+  - path: /.well-known/acp.json
+    status: 404
+  - path: /.well-known/aauth-resource.json
+    status: 404
+  - path: /.well-known/apis.json
+    status: 404
+  - path: /apis.json
+    status: 404
+  - path: /apis.yml
+    status: 404
+  - path: /.well-known/mcp.json
+    status: 404
+  - path: /mcp
+    status: 404
+  - path: /llms.txt
+    status: 404
+  - path: /llms-full.txt
+    status: 404
+  - path: /robots.txt
+    status: 404
+  - path: /sitemap.xml
+    status: 404
+  - path: /.well-known/apievangelist-negative-control-7f3a.json
+    status: 404
+    note: Negative control — a path that cannot exist. Returns the same 22-byte JSON 404 as every miss above, so a 200 on this host is a served document.
+- host: elonsusk.com
+  role: registrable domain (apis.yml identity host); serves no website
+  documents:
+  - path: /.well-known/agent-card.json
+    status: 0
+    note: TLS connection refused on 443 (curl exit 7). Port 80 answers HTTP 401 for / and serves no document. The A record is 178.105.215.168.
+  - path: /.well-known/agent.json
+    status: 0
+  - path: /.well-known/security.txt
+    status: 0
+  - path: /.well-known/openid-configuration
+    status: 0
+  - path: /.well-known/oauth-authorization-server
+    status: 0
+  - path: /.well-known/oauth-protected-resource
+    status: 0
+  - path: /.well-known/api-catalog
+    status: 0
+  - path: /.well-known/ai-plugin.json
+    status: 0
+  - path: /.well-known/ucp.json
+    status: 0
+  - path: /.well-known/acp.json
+    status: 0
+  - path: /.well-known/aauth-resource.json
+    status: 0
+  - path: /.well-known/apis.json
+    status: 0
+  - path: /apis.json
+    status: 0
+  - path: /apis.yml
+    status: 0
+- host: www.elonsusk.com
+  role: www alias; same A record as the apex; serves nothing
+  documents:
+  - path: /.well-known/agent-card.json
+    status: 0
+    note: TLS connection refused on 443, as for the apex.
+  - path: /.well-known/agent.json
+    status: 0
+  - path: /.well-known/security.txt
+    status: 0
+  - path: /.well-known/openid-configuration
+    status: 0
+  - path: /.well-known/oauth-authorization-server
+    status: 0
+  - path: /.well-known/oauth-protected-resource
+    status: 0
+  - path: /.well-known/api-catalog
+    status: 0
+  - path: /.well-known/ai-plugin.json
+    status: 0
+  - path: /.well-known/apis.json
+    status: 0
+  - path: /apis.json
+    status: 0

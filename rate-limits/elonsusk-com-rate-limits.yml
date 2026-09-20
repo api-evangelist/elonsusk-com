@@ -1,0 +1,26 @@
+generated: '2026-09-19'
+method: probed
+source: https://a2a.elonsusk.com/openapi.json
+docs:
+- https://a2a.elonsusk.com/.well-known/x402.json
+limit_count: 0
+summary: >-
+  No rate limit is published anywhere on the surface, and none was signalled at runtime: responses to
+  GET /health, GET /v1/tasks and POST /x402/{skill} carry no X-RateLimit-*, RateLimit-* or Retry-After
+  headers (the only non-content headers are Cloudflare's server, cf-ray, cf-cache-status, nel/report-to and
+  alt-svc). The OpenAPI declares no 429. An honest zero: an agent has no runtime signal to pace itself on.
+rate_limits: []
+capacity_signals:
+- name: Worker concurrency
+  value: 3
+  source: GET https://a2a.elonsusk.com/healthz — worker.max_concurrent_jobs 3
+  note: The number of paid tasks the agent works in parallel. A queue position, not a request-rate limit; unpaid tasks wait in payment_required and do not consume a slot.
+- name: x402 payment validity
+  value: 120 seconds
+  source: live 402 accepts[].maxTimeoutSeconds
+  note: How long a PAYMENT-REQUIRED challenge stays valid, per the x402 v2 shape. A payment window, not a rate limit.
+headers_observed:
+  on_200: [server: cloudflare, cf-cache-status: DYNAMIC, cf-ray, nel, report-to, alt-svc]
+  on_402: [payment-required (base64 x402 PaymentRequired), server: cloudflare]
+  rate_limit_headers: []
+  exhaustion_status: undocumented
