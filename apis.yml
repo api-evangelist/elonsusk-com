@@ -23,7 +23,7 @@ created: '2026-09-19'
 modified: '2026-09-19'
 tags:
 - Agents
-- Agent Commerce
+- Agentic Commerce
 - A2A
 - x402
 - Developer Tools
@@ -47,6 +47,7 @@ tags_raw:
 - Code review
 - Code generation
 - Agent-native
+- Agent Commerce
 apis:
 - aid: elonsusk-com:sandbox-contractor-agent-rest-api
   name: Sandbox Contractor Agent REST API
@@ -65,6 +66,12 @@ apis:
   humanURL: https://a2a.elonsusk.com/docs
   baseURL: https://a2a.elonsusk.com
   tags:
+  - x402
+  - Agentic Commerce
+  - Developer Tools
+  - Blockchain
+  - Security
+  tags_raw:
   - x402
   - Agent Commerce
   - Developer Tools
@@ -102,6 +109,11 @@ apis:
   humanURL: https://a2a.elonsusk.com/
   baseURL: https://a2a.elonsusk.com/a2a
   tags:
+  - A2A
+  - agent-native
+  - x402
+  - Agentic Commerce
+  tags_raw:
   - A2A
   - agent-native
   - x402
