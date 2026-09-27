@@ -1,0 +1,22 @@
+openapi: 3.2.0
+info:
+  title: A2A Autonomous Trader Agent Health API
+  version: 0.1.0
+tags:
+- name: Health
+paths:
+  /health:
+    get:
+      summary: Health
+      operationId: health_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Health Health Get
+      tags:
+      - Health

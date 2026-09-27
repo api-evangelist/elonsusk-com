@@ -1,0 +1,20 @@
+openapi: 3.2.0
+info:
+  title: A2A Autonomous Trader Agent API
+  version: 0.1.0
+tags:
+- name: A2A Autonomous Trader Agent
+paths:
+  /:
+    get:
+      summary: Root
+      operationId: root__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/html:
+              schema:
+                type: string
+      tags:
+      - A2A Autonomous Trader Agent

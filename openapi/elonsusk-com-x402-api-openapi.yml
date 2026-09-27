@@ -1,0 +1,76 @@
+openapi: 3.2.0
+info:
+  title: A2A Autonomous Trader Agent X402 API
+  version: 0.1.0
+tags:
+- name: X402
+paths:
+  /x402/{skill}:
+    post:
+      summary: X402 Pay Per Call
+      description: 'HTTP x402 gate: Challenge → Sign → Retry → Settle for contractor skills.
+
+
+        Without PAYMENT-SIGNATURE → 402 + PAYMENT-REQUIRED.
+
+        With valid signature → settle, create A2A task (marked paid), return receipt + artifact.'
+      operationId: x402_pay_per_call_x402__skill__post
+      parameters:
+      - name: skill
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Skill
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                title: Response X402 Pay Per Call X402  Skill  Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - X402
+components:
+  schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError

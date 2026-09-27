@@ -1,0 +1,71 @@
+openapi: 3.2.0
+info:
+  title: A2A Autonomous Trader Agent Showcase API
+  version: 0.1.0
+tags:
+- name: Showcase
+paths:
+  /showcase/zeroclaw:
+    get:
+      summary: Zeroclaw Showcase
+      operationId: zeroclaw_showcase_showcase_zeroclaw_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/html:
+              schema:
+                type: string
+      tags:
+      - Showcase
+  /showcase/zeroclaw/one-pager:
+    get:
+      summary: Zeroclaw One Pager
+      operationId: zeroclaw_one_pager_showcase_zeroclaw_one_pager_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/plain:
+              schema:
+                type: string
+      tags:
+      - Showcase
+  /showcase/zeroclaw/readme:
+    get:
+      summary: Zeroclaw Readme
+      operationId: zeroclaw_readme_showcase_zeroclaw_readme_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/plain:
+              schema:
+                type: string
+      tags:
+      - Showcase
+  /showcase/zeroclaw/video-shot-list:
+    get:
+      summary: Zeroclaw Video Shot List
+      operationId: zeroclaw_video_shot_list_showcase_zeroclaw_video_shot_list_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/plain:
+              schema:
+                type: string
+      tags:
+      - Showcase
+  /showcase/zeroclaw/artifacts.zip:
+    get:
+      summary: Zeroclaw Artifacts Zip
+      operationId: zeroclaw_artifacts_zip_showcase_zeroclaw_artifacts_zip_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Showcase

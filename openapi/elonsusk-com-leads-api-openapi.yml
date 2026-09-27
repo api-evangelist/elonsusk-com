@@ -1,0 +1,107 @@
+openapi: 3.2.0
+info:
+  title: A2A Autonomous Trader Agent Leads API
+  version: 0.1.0
+tags:
+- name: Leads
+paths:
+  /v1/leads:
+    post:
+      summary: Create Public Lead
+      operationId: create_public_lead_v1_leads_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicLeadRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Create Public Lead V1 Leads Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Leads
+components:
+  schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    PublicLeadRequest:
+      properties:
+        contact:
+          type: string
+          maxLength: 240
+          minLength: 3
+          title: Contact
+        brief:
+          type: string
+          maxLength: 8000
+          minLength: 12
+          title: Brief
+        skill:
+          type: string
+          maxLength: 80
+          title: Skill
+          default: code.review
+        budget_usd:
+          anyOf:
+          - type: number
+            maximum: 100000.0
+            minimum: 0.0
+          - type: 'null'
+          title: Budget Usd
+        source:
+          anyOf:
+          - type: string
+            maxLength: 120
+          - type: 'null'
+          title: Source
+          default: public_hire_form
+      type: object
+      required:
+      - contact
+      - brief
+      title: PublicLeadRequest
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
