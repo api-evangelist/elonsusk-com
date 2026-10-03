@@ -134,6 +134,29 @@ paths:
       - Tasks
 components:
   schemas:
+    MarkPaidRequest:
+      properties:
+        tx_ref:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tx Ref
+        note:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Note
+      type: object
+      title: MarkPaidRequest
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
     ValidationError:
       properties:
         loc:
@@ -175,26 +198,3 @@ components:
           title: Client Task Id
       type: object
       title: CreateTaskRequest
-    MarkPaidRequest:
-      properties:
-        tx_ref:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Tx Ref
-        note:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Note
-      type: object
-      title: MarkPaidRequest
-    HTTPValidationError:
-      properties:
-        detail:
-          items:
-            $ref: '#/components/schemas/ValidationError'
-          type: array
-          title: Detail
-      type: object
-      title: HTTPValidationError

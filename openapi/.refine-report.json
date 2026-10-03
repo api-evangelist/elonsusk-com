@@ -1,7 +1,7 @@
 {
   "provider": "elonsusk-com",
   "sources": [
-    "elonsusk-com-openapi.json"
+    "_original/elonsusk-com-openapi.json"
   ],
   "outputs": [
     "elonsusk-com-well-known-api-openapi.yml",
@@ -17,12 +17,11 @@
     "elonsusk-com-tasks-api-openapi.yml",
     "elonsusk-com-x402-api-openapi.yml"
   ],
-  "archived": [
-    "archived openapi/elonsusk-com-openapi.json"
-  ],
+  "archived": [],
   "errors": [],
   "warnings": [],
   "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
     "elonsusk-com-openapi.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
     "elonsusk-com-openapi.json: tagged paths GET /.well-known/agent-card.json -> .well Known",
     "elonsusk-com-openapi.json: tagged paths GET /.well-known/agent.json -> .well Known",
@@ -59,7 +58,20 @@
     "elonsusk-com-openapi.json: declared missing tag: Showcase",
     "elonsusk-com-openapi.json: declared missing tag: Tasks",
     "elonsusk-com-openapi.json: declared missing tag: X402",
-    "apis.yml register: written (+12 apis, 13 total)"
+    "apis.yml register: already-registered"
   ],
-  "skipped": []
+  "skipped": [
+    "elonsusk-com-a2a-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "elonsusk-com-a2a-autonomous-trader-agent-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "elonsusk-com-health-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "elonsusk-com-healthz-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "elonsusk-com-healthz-earn-superteam-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "elonsusk-com-leads-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "elonsusk-com-metrics-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "elonsusk-com-payments-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "elonsusk-com-showcase-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "elonsusk-com-tasks-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "elonsusk-com-well-known-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "elonsusk-com-x402-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }
