@@ -148,6 +148,21 @@ components:
           title: Note
       type: object
       title: MarkPaidRequest
+    CreateTaskRequest:
+      properties:
+        skill:
+          type: string
+          title: Skill
+          default: inference.complete
+        input:
+          title: Input
+        client_task_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Client Task Id
+      type: object
+      title: CreateTaskRequest
     HTTPValidationError:
       properties:
         detail:
@@ -183,18 +198,3 @@ components:
       - msg
       - type
       title: ValidationError
-    CreateTaskRequest:
-      properties:
-        skill:
-          type: string
-          title: Skill
-          default: inference.complete
-        input:
-          title: Input
-        client_task_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Client Task Id
-      type: object
-      title: CreateTaskRequest
