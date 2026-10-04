@@ -89,6 +89,8 @@ apis:
   humanURL: https://a2a.elonsusk.com/docs
   baseURL: https://a2a.elonsusk.com/a2a
   tags:
+  - A2A
+  tags_raw:
   - A2a
   properties:
   - type: OpenAPI
@@ -254,6 +256,8 @@ apis:
   humanURL: https://a2a.elonsusk.com/docs
   baseURL: https://a2a.elonsusk.com/a2a
   tags:
+  - Task
+  tags_raw:
   - Tasks
   properties:
   - type: OpenAPI
@@ -290,6 +294,8 @@ apis:
   humanURL: https://a2a.elonsusk.com/docs
   baseURL: https://a2a.elonsusk.com/a2a
   tags:
+  - x402
+  tags_raw:
   - X402
   properties:
   - type: OpenAPI
