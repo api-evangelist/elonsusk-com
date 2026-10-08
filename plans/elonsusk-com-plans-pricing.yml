@@ -100,3 +100,31 @@ invoice_notes:
   source: agent card payment_methods / payment_notes
 free_tier: none
 refund_policy: not published
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - subscription
+  units: []
+  plans:
+  - name: Quick Review
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Full Code Gen
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Rush 1hr
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
