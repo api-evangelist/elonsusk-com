@@ -69,3 +69,9 @@ paths:
               schema: {}
       tags:
       - Showcase
+x-provenance:
+  method: harvested
+  publisher: Artem / A2A Sandbox
+  source: https://a2a.elonsusk.com/openapi.json
+  note: split by refine-openapis from the provider's own published document, verified by fetch (openapi/_original/*.fetch.json);
+    stamped by stamp-openapi-provenance.py (roadmap#793)
