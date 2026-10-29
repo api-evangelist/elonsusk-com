@@ -64,9 +64,129 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Artem / A2A Sandbox runs the "Sandbox Contractor Agent" at a2a.elonsusk.com: an Agent2Agent (A2A) JSON-RPC agent selling 28 skills — keyless developer utilities, on-chain EVM/Solana data reads and MCP-manifest / EVM-contract security scans, plus quote-first code review, code generation and inference — each payable per call over the x402 v2 HTTP payment protocol (USDC on Base or Solana, from $0.001) or through a multi-chain crypto invoice. The same FastAPI origin publishes an OpenAPI 3.1.0 contract, an A2A agent card and an x402 discovery document. The registrable domain elonsusk.com serves no website; the a2a subdomain is the whole public surface.
+Artem / A2A Sandbox is a one-operator agent-commerce sandbox that runs a paid "Sandbox Contractor Agent" at a2a.elonsusk.com: an Agent2Agent (A2A) JSON-RPC agent selling 28 skills — keyless developer utilities (JSON/YAML/CSV conversion, hashing incl. keccak256, base64/hex/base58, JWT decode, UUID, semver, epoch), on-chain data reads (EVM and Solana balances, ERC-20 metadata, gas price, transaction status, SPL supply) and security scans (MCP tool-manifest risk, EVM contract bytecode signals) — plus model-backed code review, code generation and inference sold quote-first. Every skill is payable per call over the x402 v2 HTTP payment protocol (HTTP 402 + PAYMENT-REQUIRED challenge, USDC on Base or Solana, from $0.001) at POST /x402/{skill}, or through a classic multi-chain crypto invoice (SOL, USDC, ETH, BTC) on the REST task API. The same FastAPI origin publishes an OpenAPI 3.1.0 contract at /openapi.json with Swagger UI at /docs, an A2A agent card at /.well-known/agent-card.json, an x402 discovery document at /.well-known/x402.json, and live health and revenue-metrics endpoints. The registrable domain elonsusk.com itself serves no website (TLS refused, HTTP 401); the a2a subdomain is the whole public surface.
 
-- https://a2a.elonsusk.com/
-- Agent card: https://a2a.elonsusk.com/.well-known/agent-card.json
-- OpenAPI: https://a2a.elonsusk.com/openapi.json (Swagger UI at /docs)
-- x402 discovery: https://a2a.elonsusk.com/.well-known/x402.json
+**Areas:** Agents · Agentic Commerce · A2A · x402 · Developer Tools · Blockchain · Solana · Ethereum · Security · Code Review · Code Generation · Agent-Native
+
+## Artem / A2A Sandbox on APIs.io
+
+Everything profiled for Artem / A2A Sandbox is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/elonsusk-com/](https://apis.io/providers/elonsusk-com/)** — or go straight to one of the APIs or properties below.
+
+### APIs (13)
+
+- [Sandbox Contractor Agent (A2A)](https://apis.io/apis/elonsusk-com/sandbox-contractor-agent-a2a/) — Agent2Agent protocol surface: an agent card served from https://a2a.elonsusk.com/.well-known/agent-card.json (and the legacy /.well-known/agent.json)…
+- [Artem / A2A Sandbox A2a API](https://apis.io/apis/elonsusk-com/elonsusk-com-a2a-api/) — The A2a API from Artem / A2A Sandbox — 1 operation(s) for a2a.
+- [Artem / A2A Sandbox A2A Autonomous Trader Agent API](https://apis.io/apis/elonsusk-com/elonsusk-com-a2a-autonomous-trader-agent-api/) — The A2A Autonomous Trader Agent API from Artem / A2A Sandbox — 1 operation(s) for a2a autonomous trader agent.
+- [Artem / A2A Sandbox Health API](https://apis.io/apis/elonsusk-com/elonsusk-com-health-api/) — The Health API from Artem / A2A Sandbox — 1 operation(s) for health.
+- [Artem / A2A Sandbox Healthz API](https://apis.io/apis/elonsusk-com/elonsusk-com-healthz-api/) — The Healthz API from Artem / A2A Sandbox — 1 operation(s) for healthz.
+- [Artem / A2A Sandbox Healthz.earn.superteam API](https://apis.io/apis/elonsusk-com/elonsusk-com-healthz-earn-superteam-api/) — The Healthz.earn.superteam API from Artem / A2A Sandbox — 1 operation(s) for healthz.earn.superteam.
+- [Artem / A2A Sandbox Leads API](https://apis.io/apis/elonsusk-com/elonsusk-com-leads-api/) — The Leads API from Artem / A2A Sandbox — 1 operation(s) for leads.
+- [Artem / A2A Sandbox Metrics API](https://apis.io/apis/elonsusk-com/elonsusk-com-metrics-api/) — The Metrics API from Artem / A2A Sandbox — 1 operation(s) for metrics.
+- [Artem / A2A Sandbox Payments API](https://apis.io/apis/elonsusk-com/elonsusk-com-payments-api/) — The Payments API from Artem / A2A Sandbox — 1 operation(s) for payments.
+- [Artem / A2A Sandbox Showcase API](https://apis.io/apis/elonsusk-com/elonsusk-com-showcase-api/) — The Showcase API from Artem / A2A Sandbox — 5 operation(s) for showcase.
+- [Artem / A2A Sandbox Tasks API](https://apis.io/apis/elonsusk-com/elonsusk-com-tasks-api/) — The Tasks API from Artem / A2A Sandbox — 3 operation(s) for tasks.
+- [Artem / A2A Sandbox .well Known API](https://apis.io/apis/elonsusk-com/elonsusk-com-well-known-api/) — The .well Known API from Artem / A2A Sandbox — 5 operation(s) for .well known.
+- [Artem / A2A Sandbox X402 API](https://apis.io/apis/elonsusk-com/elonsusk-com-x402-api/) — The X402 API from Artem / A2A Sandbox — 1 operation(s) for x402.
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [elonsusk-com-sandbox-contractor](https://apis.io/servers/elonsusk-com/elonsusk-com-sandbox-contractor/)
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Elonsusk Com Agentic Access](https://apis.io/agentic-access/elonsusk-com/elonsusk-com-agentic-access/)
+
+#### Overlays (1)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Elonsusk Com Openapi Overlay](https://apis.io/overlays/elonsusk-com/elonsusk-com-openapi-overlay/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Elonsusk Com Authentication](https://apis.io/security/elonsusk-com/elonsusk-com-authentication/)
+- [Elonsusk Com Domain Security](https://apis.io/security/elonsusk-com/elonsusk-com-domain-security/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Elonsusk Com Plans Pricing](https://apis.io/plans/elonsusk-com/elonsusk-com-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Elonsusk Com Rate Limits](https://apis.io/rate-limits/elonsusk-com/elonsusk-com-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://a2a.elonsusk.com/)
+- [Documentation](https://a2a.elonsusk.com/docs)
+- [API reference](https://a2a.elonsusk.com/redoc)
+- [Pricing](https://a2a.elonsusk.com/)
+
+## API Evangelist rating
+
+**Kin Score 31.9** — thin · rubric 0.24.0 · scored 2026-10-17
+
+| Facet | Score |
+|---|---|
+| Discoverability | 69.6 |
+| Contract quality | 35.0 |
+| Contract governance | 18.2 |
+| Operational transparency | 0.0 |
+| Developer ergonomics | 30.4 |
+| Access clarity | 42.1 |
+
+**Agent readiness 32.2** — agent-ready
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | — |
+| MCP Server | — |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | — |
+| Error Semantics | verified |
+| OpenAPI Examples | — |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | — |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | conformant |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+
+**Regulatory alignment 16.7** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/elonsusk-com/](https://apis.io/providers/elonsusk-com/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Artem / A2A Sandbox: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/elonsusk-com/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
